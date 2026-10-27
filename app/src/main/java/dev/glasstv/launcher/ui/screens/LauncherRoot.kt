@@ -43,6 +43,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.key
 import androidx.compose.ui.focus.FocusRequester
@@ -165,10 +166,12 @@ fun LauncherRoot(app: GlassApp, ui: LauncherUi) {
 }
 
 /**
- * tvOS-style home: a row of large rounded app tiles (favorites), a frosted search bar underneath,
- * then the rest of the apps. Controls live in a small cluster top-right instead of a dock.
+ * Apple TV–style home, personalised:
+ *   top-right: greeting, clock, weather and a profile initial
+ *   "Jump back in": two large cards for the apps you used last (favorites until there's history)
+ *   beside them: an Assistant card
+ *   a frosted search bar, then the app row (favorites), then everything else.
  */
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun HomeScreen(
     app: GlassApp,
@@ -183,6 +186,8 @@ private fun HomeScreen(
     val byPkg = remember(apps) { apps.associateBy { it.packageName } }
     val pinned = remember(pinnedPkgs, byPkg) { pinnedPkgs.mapNotNull { byPkg[it] } }
     val others = remember(pinnedPkgs, apps) { apps.filter { it.packageName !in pinnedPkgs } }
+    val recent = remember(settings.recents, byPkg) { settings.recents.mapNotNull { byPkg[it] } }
+    val hero = remember(recent, pinned, others) { (recent + pinned + others).distinct().take(2) }
     var query by remember { mutableStateOf("") }
     val results = remember(query, apps) {
         val q = query.trim().lowercase()
@@ -190,15 +195,15 @@ private fun HomeScreen(
             .sortedBy { if (it.label.lowercase().startsWith(q)) 0 else 1 }
     }
     val scope = rememberCoroutineScope()
-    val gridState = rememberLazyGridState()
-    val firstTile = remember { FocusRequester() }
+    val scroll = rememberScrollState()
+    val firstFocus = remember { FocusRequester() }
 
     LaunchedEffect(apps.isNotEmpty(), interactive) {
-        // The row's first item may not be composed on the first frame; retry briefly.
-        if (apps.isNotEmpty() && interactive) repeat(10) { delay(50); if (runCatching { firstTile.requestFocus() }.getOrDefault(false)) return@LaunchedEffect }
+        // Items may not be composed on the first frame; retry briefly.
+        if (apps.isNotEmpty() && interactive) repeat(10) { delay(50); if (runCatching { firstFocus.requestFocus() }.getOrDefault(false)) return@LaunchedEffect }
     }
     LaunchedEffect(ui.homeTick) {
-        if (ui.homeTick > 0) { query = ""; gridState.scrollToItem(0); runCatching { firstTile.requestFocus() } }
+        if (ui.homeTick > 0) { query = ""; scroll.scrollTo(0); runCatching { firstFocus.requestFocus() } }
     }
     fun togglePin(pkg: String) = scope.launch {
         app.settingsRepo.setPinned(if (pkg in pinnedPkgs) pinnedPkgs - pkg else pinnedPkgs + pkg)
@@ -216,57 +221,116 @@ private fun HomeScreen(
             // While an overlay is up, D-pad focus can't wander back into the home screen behind it.
             .then(if (interactive) Modifier else Modifier.focusProperties { onEnter = { cancelFocusChange() } })
             .focusGroup()
-            .padding(horizontal = 56.dp, vertical = 28.dp)
+            .verticalScroll(scroll)
+            .padding(horizontal = 56.dp, vertical = 26.dp)
     ) {
         TopBar(settings, now, ui)
-        Spacer(Modifier.height(18.dp))
+        Spacer(Modifier.height(14.dp))
 
-        // Top row: favorites as big tvOS tiles (falls back to all apps if nothing is pinned).
-        val topRow = (if (pinned.isNotEmpty()) pinned else others).take(12)
-        // A plain scrolling Row (≤12 tiles): LazyRow rejected programmatic initial focus on its items.
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(28.dp),
-            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
-                .padding(horizontal = 8.dp, vertical = 14.dp),
-        ) {
-            topRow.forEach { a ->
-                key(a.packageName) { AppTile(
-                    app, a,
-                    Modifier.width(164.dp),
-                    focus = if (a == topRow.first()) firstTile else null,
-                    onLongClick = { togglePin(a.packageName) },
-                ) }
+        if (query.isBlank()) {
+            SectionHeader(if (recent.isNotEmpty()) "Jump back in" else "Up next")
+            Row(Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 6.dp), horizontalArrangement = Arrangement.spacedBy(28.dp)) {
+                hero.forEachIndexed { i, a ->
+                    HeroCard(app, a, Modifier.weight(1f), focus = if (i == 0) firstFocus else null)
+                }
+                AssistantCard(app, ui, Modifier.weight(0.8f))
             }
         }
 
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(16.dp))
         SearchBar(
             query = query,
             onQuery = { query = it },
             onSubmit = ::submitSearch,
-            modifier = Modifier.align(Alignment.CenterHorizontally).width(640.dp),
+            modifier = Modifier.align(Alignment.CenterHorizontally).width(620.dp),
         )
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(8.dp))
 
-        val gridApps = if (query.isNotBlank()) results else (if (pinned.isNotEmpty()) others else others.drop(12))
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(6),
-            state = gridState,
-            modifier = Modifier.weight(1f).fillMaxWidth(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(24.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            if (query.isNotBlank() && results.isEmpty()) {
-                item(span = { GridItemSpan(maxLineSpan) }, key = "noresults") {
-                    GlassText(
-                        "No apps match \"${query.trim()}\". Press OK on the search bar to ask the assistant.",
-                        GlassType.body, Modifier.padding(8.dp), color = LocalGlass.current.textSoft,
-                    )
+        if (query.isNotBlank()) {
+            if (results.isEmpty()) GlassText(
+                "No apps match \"${query.trim()}\". Press OK in the search bar to ask the assistant.",
+                GlassType.body, Modifier.padding(12.dp), color = LocalGlass.current.textSoft,
+            ) else AppRow(app, results, null, ::togglePin)
+        } else {
+            AppRow(app, if (pinned.isNotEmpty()) pinned else others.take(10), if (hero.isEmpty()) firstFocus else null, ::togglePin)
+            val rest = if (pinned.isNotEmpty()) others else others.drop(10)
+            rest.chunked(6).forEach { AppRow(app, it, null, ::togglePin) }
+        }
+    }
+}
+
+/** A row of tvOS app tiles. Plain scrolling Row: LazyRow rejected programmatic initial focus. */
+@Composable
+private fun AppRow(app: GlassApp, apps: List<TvApp>, focus: FocusRequester?, onLongClick: (String) -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 6.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(26.dp),
+    ) {
+        apps.forEachIndexed { i, a ->
+            key(a.packageName) {
+                AppTile(app, a, Modifier.width(150.dp), onLongClick = { onLongClick(a.packageName) }, focus = if (i == 0) focus else null)
+            }
+        }
+    }
+}
+
+@Composable
+private fun SectionHeader(text: String) {
+    GlassText(text, GlassType.title, Modifier.padding(start = 4.dp), color = LocalGlass.current.text)
+}
+
+/** Large "top shelf" card: the app's own banner art, name and a soft label. */
+@Composable
+private fun HeroCard(app: GlassApp, tvApp: TvApp, modifier: Modifier, focus: FocusRequester?) {
+    val c = LocalGlass.current
+    var art by remember(tvApp.packageName) { mutableStateOf<AppArt?>(null) }
+    LaunchedEffect(tvApp.packageName) { art = app.appRepo.art(tvApp) }
+    GlassButton(
+        onClick = { app.appRepo.launch(tvApp) },
+        modifier = modifier.aspectRatio(16f / 9f).then(if (focus != null) Modifier.focusRequester(focus) else Modifier),
+        shape = RoundedCornerShape(28.dp),
+        focusScale = 1.05f,
+    ) {
+        val a = art
+        Box(Modifier.fillMaxSize()) {
+            if (a != null && a.isBanner) {
+                Image(a.image, null, Modifier.fillMaxSize().clip(RoundedCornerShape(28.dp)), contentScale = ContentScale.Crop)
+            } else {
+                Box(
+                    Modifier.fillMaxSize().background(Brush.linearGradient(listOf(c.pink.copy(alpha = 0.55f), c.lilac.copy(alpha = 0.45f))), RoundedCornerShape(28.dp)),
+                    contentAlignment = Alignment.TopEnd,
+                ) { if (a != null) Image(a.image, null, Modifier.padding(22.dp).size(72.dp).clip(RoundedCornerShape(18.dp))) }
+            }
+            // Bottom caption on a soft cocoa fade, like tvOS's shelf labels.
+            Box(
+                Modifier.align(Alignment.BottomStart).fillMaxWidth()
+                    .background(Brush.verticalGradient(listOf(Color.Transparent, c.cocoa.copy(alpha = 0.55f))), RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp))
+                    .padding(horizontal = 20.dp, vertical = 14.dp)
+            ) {
+                Column {
+                    GlassText("Open", GlassType.small, color = Color.White.copy(alpha = 0.8f))
+                    GlassText(tvApp.label, GlassType.title, color = Color.White, maxLines = 1)
                 }
             }
-            items(gridApps, key = { "g_" + it.packageName }, contentType = { "tile" }) { a ->
-                AppTile(app, a, Modifier.fillMaxWidth(), onLongClick = { togglePin(a.packageName) })
+        }
+    }
+}
+
+/** The assistant, in the shelf: one press opens it with a suggestion ready. */
+@Composable
+private fun AssistantCard(app: GlassApp, ui: LauncherUi, modifier: Modifier) {
+    val c = LocalGlass.current
+    GlassButton(
+        onClick = { ui.aiOpen = true },
+        modifier = modifier.aspectRatio(16f / 11.25f),
+        shape = RoundedCornerShape(28.dp),
+        focusScale = 1.05f,
+    ) {
+        Column(Modifier.fillMaxSize().padding(22.dp), verticalArrangement = Arrangement.SpaceBetween) {
+            Box(Modifier.size(52.dp).background(Brush.radialGradient(listOf(Color.White, c.pink, c.rose, c.cocoa)), CircleShape))
+            Column {
+                GlassText("Ask Glass", GlassType.title)
+                GlassText("Recommendations, recaps, or just say “open Netflix”", GlassType.label, color = c.textSoft, maxLines = 3)
             }
         }
     }
@@ -279,45 +343,43 @@ private fun TopBar(settings: Settings, now: LocalDateTime, ui: LauncherUi) {
     val weather = rememberWeather(settings)
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.Bottom) {
-                GlassText(now.format(DateTimeFormatter.ofPattern("h:mm")), GlassType.clock.copy(fontSize = GlassType.clock.fontSize * 0.8f), maxLines = 1)
-                Spacer(Modifier.width(18.dp))
-                Column(Modifier.padding(bottom = 10.dp)) {
-                    GlassText(
-                        if (settings.greetingName.isBlank()) greeting else "$greeting, ${settings.greetingName}",
-                        GlassType.title, maxLines = 1,
-                    )
-                    GlassText(
-                        listOfNotNull(
-                            now.format(DateTimeFormatter.ofPattern("EEEE, MMMM d")),
-                            weather?.let { "${it.glyph} ${it.temp}° ${it.description}" },
-                        ).joinToString("   ·   "),
-                        GlassType.label, color = c.textSoft, maxLines = 1,
-                    )
-                }
-            }
+            GlassText(
+                if (settings.greetingName.isBlank()) greeting else "$greeting, ${settings.greetingName}",
+                GlassType.greeting, maxLines = 1,
+            )
+            GlassText(
+                listOfNotNull(
+                    now.format(DateTimeFormatter.ofPattern("h:mm")),
+                    now.format(DateTimeFormatter.ofPattern("EEEE, MMMM d")),
+                    weather?.let { "${it.glyph} ${it.temp}°" },
+                ).joinToString("  ·  "),
+                GlassType.label, color = c.textSoft, maxLines = 1,
+            )
         }
-        // Control cluster (replaces the dock): assistant · ambient · phone remote · settings.
-        Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            GlassButton(onClick = { ui.aiOpen = true }, shape = CircleShape, modifier = Modifier.size(58.dp)) {
-                Box(Modifier.size(34.dp).background(Brush.radialGradient(listOf(Color.White, c.pink, c.rose, c.cocoa)), CircleShape))
-            }
+        Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
             CircleIcon("☾") { ui.ambient = true }
-            GlassButton(onClick = { ui.qrOpen = true }, shape = CircleShape, modifier = Modifier.size(58.dp)) {
-                // Phone glyph drawn in-palette (the unicode options render inconsistently on TV fonts).
-                Box(Modifier.size(16.dp, 26.dp).border(2.5.dp, c.text, RoundedCornerShape(5.dp)), contentAlignment = Alignment.BottomCenter) {
+            GlassButton(onClick = { ui.qrOpen = true }, shape = CircleShape, modifier = Modifier.size(52.dp)) {
+                // Phone glyph drawn in-palette (unicode options render inconsistently on TV fonts).
+                Box(Modifier.size(14.dp, 23.dp).border(2.3.dp, c.text, RoundedCornerShape(4.dp)), contentAlignment = Alignment.BottomCenter) {
                     Box(Modifier.padding(bottom = 3.dp).size(4.dp).background(c.text, CircleShape))
                 }
             }
             CircleIcon("⚙") { ui.settingsOpen = true }
+            // Profile: the greeting name's initial, opens Settings (where the name lives).
+            GlassButton(onClick = { ui.settingsOpen = true }, shape = CircleShape, modifier = Modifier.size(52.dp)) {
+                Box(
+                    Modifier.size(52.dp).background(Brush.linearGradient(listOf(c.rose, c.cocoa)), CircleShape),
+                    contentAlignment = Alignment.Center,
+                ) { GlassText(settings.greetingName.take(1).uppercase().ifEmpty { "☺" }, GlassType.title, color = Color.White) }
+            }
         }
     }
 }
 
 @Composable
 private fun CircleIcon(glyph: String, onClick: () -> Unit) {
-    GlassButton(onClick = onClick, shape = CircleShape, modifier = Modifier.size(58.dp)) {
-        GlassText(glyph, GlassType.title.copy(fontSize = GlassType.title.fontSize * 1.15f))
+    GlassButton(onClick = onClick, shape = CircleShape, modifier = Modifier.size(52.dp)) {
+        GlassText(glyph, GlassType.title)
     }
 }
 

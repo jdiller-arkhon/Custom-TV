@@ -22,7 +22,7 @@ Every system-level change and its exact undo: **[docs/recovery.md](docs/recovery
 
 ## Screens
 
-Rendered from the real launcher code at 1920×1080. App icons here are Robolectric placeholders; on the TV each tile uses the app's own banner or icon.
+Rendered from the real launcher code at 1920×1080. App art here is stand-in initials (no real apps exist in the test environment); on the TV every tile and card shows the app's own official banner or icon, pulled from the installed app.
 
 | Home | Assistant |
 |---|---|
@@ -36,7 +36,7 @@ Regenerate: `./gradlew :app:testDebugUnitTest -PtvScreens --tests '*TvScreensTes
 
 | | |
 |---|---|
-| **Home** | tvOS-style: clock and greeting, a row of large rounded favorite tiles (name appears under the focused one), a frosted search bar underneath (filters apps live; OK launches or asks the assistant), then all other apps. Controls (assistant, ambient, phone remote, settings) sit top-right. |
+| **Home** | Apple TV–style and personal: greeting, clock, weather and your profile initial; **Jump back in** cards for the apps you opened last (their real TV banners) next to an **Ask Glass** assistant card; a frosted search bar (filters apps live; OK launches or asks the assistant); then your favorites row and the rest of your apps. |
 | **Apps** | All leanback apps, then phone-only launcher apps. Live updates on install/uninstall. Default favorites are whichever of Netflix, YouTube, Disney+, Max, Prime Video, Spotify, Plex and Twitch are installed. **Long-press OK** on a tile to pin or unpin it. Reorder in Settings. |
 | **Focus** | Focused tile scales 1.08× with a solid rose ring and a pink glow. |
 

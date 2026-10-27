@@ -62,6 +62,7 @@ class GlassApp : Application() {
                 if (cmd is LocalCommand.OpenApp) appRepo.launch(cmd.packageName) else uiCommands.tryEmit(cmd)
             },
         )
+        appRepo.onLaunched = { pkg -> scope.launch { settingsRepo.recordLaunch(pkg) } }
         seedDefaultPins()
         scope.launch { RemoteBus.commands.collect(::route) }
     }

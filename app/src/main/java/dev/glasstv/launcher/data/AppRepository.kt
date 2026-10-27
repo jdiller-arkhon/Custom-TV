@@ -86,12 +86,13 @@ class AppRepository(private val context: Context, private val scope: CoroutineSc
         artCache.get(app.packageName)?.let { return it }
         return withContext(Dispatchers.IO) {
             runCatching {
-                val info = pm.getActivityInfo(app.component, 0)
-                val banner = info.loadBanner(pm) ?: info.applicationInfo.loadBanner(pm)
+                // The app's own published artwork: its TV banner (activity, then app level) or its launcher icon.
+                val banner = runCatching { pm.getActivityBanner(app.component) }.getOrNull()
+                    ?: runCatching { pm.getApplicationBanner(app.packageName) }.getOrNull()
                 val art = if (banner != null) {
                     AppArt(banner.toBitmap(320, 180).asImageBitmap(), true)
                 } else {
-                    AppArt(info.loadIcon(pm).toBitmap(192, 192).asImageBitmap(), false)
+                    AppArt(pm.getActivityIcon(app.component).toBitmap(192, 192).asImageBitmap(), false)
                 }
                 artCache.put(app.packageName, art)
                 art
@@ -104,12 +105,15 @@ class AppRepository(private val context: Context, private val scope: CoroutineSc
     fun iconDataUrl(app: TvApp): String? {
         iconUrls.get(app.packageName)?.let { return it }
         return runCatching {
-            val bmp = pm.getActivityInfo(app.component, 0).loadIcon(pm).toBitmap(96, 96)
+            val bmp = pm.getActivityIcon(app.component).toBitmap(96, 96)
             val bytes = java.io.ByteArrayOutputStream().also { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }.toByteArray()
             ("data:image/png;base64," + android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP))
                 .also { iconUrls.put(app.packageName, it) }
         }.getOrNull()
     }
+
+    /** Called after a successful launch (records recents). */
+    var onLaunched: ((String) -> Unit)? = null
 
     fun launch(app: TvApp): Boolean = launch(app.packageName)
 
@@ -118,7 +122,7 @@ class AppRepository(private val context: Context, private val scope: CoroutineSc
             ?: pm.getLaunchIntentForPackage(packageName)
             ?: return false
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)
-        return runCatching { context.startActivity(intent) }.isSuccess
+        return runCatching { context.startActivity(intent) }.isSuccess.also { if (it) onLaunched?.invoke(packageName) }
     }
 
     fun isInstalled(pkg: String) = runCatching { pm.getPackageInfo(pkg, 0) }.isSuccess

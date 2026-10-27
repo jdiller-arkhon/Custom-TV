@@ -32,6 +32,8 @@ data class Settings(
     val pairedPhones: List<PairedPhone> = emptyList(),
     val homeOverride: Boolean = true,
     val onboarded: Boolean = false,
+    /** Packages most recently opened from Glass TV, newest first (for "Jump back in"). */
+    val recents: List<String> = emptyList(),
 )
 
 private val Context.store by preferencesDataStore("settings")
@@ -52,6 +54,7 @@ class SettingsRepository(private val context: Context) {
         val phones = stringPreferencesKey("paired_phones")
         val homeOverride = booleanPreferencesKey("home_override")
         val onboarded = booleanPreferencesKey("onboarded")
+        val recents = stringPreferencesKey("recents")
     }
 
     val settings: Flow<Settings> = context.store.data.map { it.toSettings() }
@@ -71,6 +74,7 @@ class SettingsRepository(private val context: Context) {
         pairedPhones = this[K.phones]?.let(::decodePhones) ?: emptyList(),
         homeOverride = this[K.homeOverride] ?: true,
         onboarded = this[K.onboarded] ?: false,
+        recents = this[K.recents]?.split(',')?.filter { it.isNotBlank() } ?: emptyList(),
     )
 
     suspend fun setName(v: String) = context.store.edit { it[K.name] = v.trim().take(40) }
@@ -79,6 +83,10 @@ class SettingsRepository(private val context: Context) {
     suspend fun setExtraBlur(v: Boolean) = context.store.edit { it[K.extraBlur] = v }
     suspend fun setFahrenheit(v: Boolean) = context.store.edit { it[K.fahrenheit] = v }
     suspend fun setHomeOverride(v: Boolean) = context.store.edit { it[K.homeOverride] = v }
+    suspend fun recordLaunch(pkg: String) = context.store.edit {
+        val list = it[K.recents]?.split(',')?.filter { p -> p.isNotBlank() && p != pkg } ?: emptyList()
+        it[K.recents] = (listOf(pkg) + list).take(8).joinToString(",")
+    }
     suspend fun setOnboarded() = context.store.edit { it[K.onboarded] = true }
     suspend fun setOllama(host: String, model: String) = context.store.edit {
         it[K.host] = host.trim()
