@@ -33,6 +33,9 @@ object Reminders {
         }
     }
 
+    /** Toast on Glass TV, or a notification over other apps. */
+    fun alert(app: GlassApp, title: String, text: String) = notify(app, app.getSystemService(NotificationManager::class.java), title, text)
+
     private fun notify(ctx: Context, nm: NotificationManager, title: String, text: String) {
         MainActivity.foreground?.let { it.ui.toast = "$title — $text"; return }
         val n = Notification.Builder(ctx, CHANNEL)

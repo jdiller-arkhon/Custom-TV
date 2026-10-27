@@ -230,7 +230,7 @@ nav button.sel svg{stroke:var(--rose)}
       <button class="qa glass" data-a="calendar"><span class="ic">📅</span>Calendar</button>
       <button class="qa glass" data-a="ambient"><span class="ic"><svg><use href="#i-moon"/></svg></span>Ambient</button>
       <button class="qa glass hot" data-a="datenight"><span class="ic">💕</span>Date Night</button>
-      <button class="qa glass" data-a="settings"><span class="ic"><svg><use href="#i-gear"/></svg></span>Settings</button>
+      <button class="qa glass" data-a="apps"><span class="ic">✿</span>Apps</button>
     </div>
     <div class="dpad glass">
       <button class="d up" data-k="up" aria-label="Up"><svg><use href="#i-up"/></svg></button>
@@ -280,12 +280,17 @@ nav button.sel svg{stroke:var(--rose)}
       <button class="btn glass" id="bs" style="flex:0 0 76px" aria-label="Backspace"><svg><use href="#i-bs"/></svg></button>
       <button class="btn primary" id="send">Send <svg><use href="#i-send"/></svg></button>
     </div>
+    <div class="row">
+      <button class="btn glass" id="love">💌 Send as a love note to Anna</button>
+    </div>
     <p class="hint">Types into the focused box on the TV, or asks Grace if none is focused.</p>
     <h2>Ask Grace</h2>
     <div class="chips">
       <button class="chip glass hot" data-a="datenight">💕 Date Night</button>
       <button class="chip glass" data-fill="Add ">📅 Add an event</button>
       <button class="chip glass" data-say="What's on our calendar this week?">🗓️ Our week</button>
+      <button class="chip glass" data-fill="Groceries: ">🛒 Grocery list</button>
+      <button class="chip glass" data-fill="Timer 10 minutes for ">⏰ Timer</button>
       <button class="chip glass" data-say="What should we watch tonight? Suggest 4 options across moods.">🍿 What should we watch?</button>
       <button class="chip glass" data-fill="Recap the latest season of ">📺 Recap a show</button>
       <button class="chip glass" data-fill="Who's in the cast of ">🎭 Who's in this?</button>
@@ -431,6 +436,7 @@ nav button.sel svg{stroke:var(--rose)}
   const txt = $('#txt');
   const submit = () => { const v = txt.value; if (!v.trim()) return; if (send({ t: 'text', v, submit: true })) { txt.value = ''; vib(); toast('Sent to TV'); } };
   $('#send').onclick = submit;
+  $('#love').onclick = () => { const v = txt.value.trim(); if (!v) { toast('Write your note first ♡'); return; } if (send({ t: 'note', v })) { txt.value = ''; vib(30); toast('💌 Sent to the TV'); } };
   txt.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(); } });
   press($('#bs'), () => { send({ t: 'backspace' }); txt.value = txt.value.slice(0, -1); }, true);
   $$('[data-say]').forEach(b => b.onclick = () => { if (send({ t: 'text', v: b.dataset.say, submit: true })) { vib(); toast('Asking Grace…'); } });

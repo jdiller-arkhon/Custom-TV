@@ -22,6 +22,7 @@ class Assistant(
     private val apps: () -> Map<String, String>,
     private val onCommand: (LocalCommand) -> Unit,
     private val calendar: dev.glasstv.launcher.data.CalendarStore? = null,
+    private val homeHandler: ((String) -> String?)? = null,
 ) {
     private val _state = MutableStateFlow(AssistantState())
     val state: StateFlow<AssistantState> = _state
@@ -44,7 +45,7 @@ class Assistant(
     fun send(text: String) {
         val prompt = text.trim()
         if (prompt.isEmpty()) return
-        calendarReply(prompt)?.let { reply ->
+        (homeHandler?.invoke(prompt) ?: calendarReply(prompt))?.let { reply ->
             _state.value = _state.value.copy(
                 messages = _state.value.messages + ChatMessage("user", prompt) + ChatMessage("assistant", reply), error = null,
             )

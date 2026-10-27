@@ -32,6 +32,8 @@ class HomeAccessibilityService : AccessibilityService() {
     override fun onServiceConnected() {
         instance = this
         stockHome = resolveStockHome()
+        // Turn the TV on → straight to Anna's home, even before anyone presses Home.
+        if (SystemClock.elapsedRealtime() < 5 * 60_000L && (application as GlassApp).settingsNow().homeOverride) openLauncher()
     }
 
     override fun onDestroy() {

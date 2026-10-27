@@ -37,6 +37,8 @@ class GlassApp : Application() {
     lateinit var remoteServer: RemoteServer
     lateinit var assistant: Assistant
     lateinit var calendar: dev.glasstv.launcher.data.CalendarStore
+    lateinit var home: dev.glasstv.launcher.data.HomeStore
+    lateinit var services: HomeServices
 
     /** null until DataStore has loaded, so the first frame never flashes the wrong theme. */
     lateinit var settings: StateFlow<Settings?>
@@ -50,11 +52,17 @@ class GlassApp : Application() {
         settings = settingsRepo.settings.stateIn(scope, SharingStarted.Eagerly, null)
         appRepo = AppRepository(this, scope)
         calendar = dev.glasstv.launcher.data.CalendarStore(this, scope)
+        home = dev.glasstv.launcher.data.HomeStore(this, scope)
+        services = HomeServices(this)
         remoteServer = RemoteServer(
             this, settingsRepo,
             settingsRepo.settings.map { it.pairedPhones }.stateIn(scope, SharingStarted.Eagerly, emptyList()),
             scope,
             shortcuts = ::shortcutsJson,
+            onNote = { text ->
+                home.addNote(dev.glasstv.launcher.data.LoveNote(text = text, from = "Justin"))
+                Reminders.alert(this, "💌 Love note from Justin", text)
+            },
         )
         assistant = Assistant(
             scope,
@@ -64,6 +72,7 @@ class GlassApp : Application() {
                 if (cmd is LocalCommand.OpenApp) appRepo.launch(cmd.packageName) else uiCommands.tryEmit(cmd)
             },
             calendar = calendar,
+            homeHandler = { services.handle(it) },
         )
         appRepo.onLaunched = { pkg -> scope.launch { settingsRepo.recordLaunch(pkg) } }
         seedDefaultPins()
@@ -118,6 +127,7 @@ class GlassApp : Application() {
 
     @Volatile private var pendingAction: QuickAction? = null
     fun takePendingAction(): QuickAction? = pendingAction.also { pendingAction = null }
+    fun pendingActionSet(a: QuickAction) { pendingAction = a }
 
     private suspend fun shortcutsJson(): JSONArray {
         val apps = appRepo.apps.value

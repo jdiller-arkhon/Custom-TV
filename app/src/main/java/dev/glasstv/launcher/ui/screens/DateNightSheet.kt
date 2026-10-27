@@ -130,6 +130,7 @@ fun DateNightSheet(app: GlassApp, reduceMotion: Boolean, onAskGrace: (String) ->
                 Action("✨  Ask Grace about it") {
                     pick?.let { onAskGrace("Tell me about \"${it.title}\" (${it.year}) in two sentences, no spoilers, and where it's usually available to stream (say if you're not sure).") }
                 }
+                Action("🍿  Save") { pick?.let { app.home.addWatch(dev.glasstv.launcher.data.WatchItem(title = it.title, year = it.year, kind = it.kind.label)) } }
                 Action("Done") { onClose() }
             }
         }

@@ -1,0 +1,40 @@
+package dev.glasstv.launcher
+
+/** Glass TV's own apps, shown in the Apps hub. [ready] = built; others show as "Soon". */
+enum class BuiltInApp(val title: String, val emoji: String, val blurb: String, val ready: Boolean = true) {
+    CALENDAR("Calendar", "📅", "Plans & reminders"),
+    DATE_NIGHT("Date Night", "💕", "Pick for the two of us"),
+    LISTS("Lists", "🛒", "Groceries & to-dos"),
+    TIMERS("Timers", "⏰", "Kitchen timers"),
+    COUNTDOWNS("Countdowns", "✨", "Days until…"),
+    WATCHLIST("Watchlist", "🍿", "Saved & rated"),
+    LOVE_NOTES("Love Notes", "💌", "Notes from your phone"),
+    MEMORY("Grace Remembers", "🧠", "Little things to keep"),
+    SLEEP("Sleep Timer", "🌙", "Pause & dim later"),
+    FIREPLACE("Fireplace", "🔥", "Cozy crackle"),
+    WOULD_YOU_RATHER("Would You Rather", "🎲", "A game for two"),
+    GUEST_WIFI("Guest Wi-Fi", "📶", "Scan to join"),
+    MEMORIES("Memories", "📸", "Photo slideshow", ready = false),
+    CHORES("Chores", "🧺", "Chart & streaks", ready = false),
+    MORNING("Morning Brief", "☀️", "Your day at a glance", ready = false),
+    WEATHER("Weather", "🌦️", "7-day forecast", ready = false),
+    TRIVIA("Movie Trivia", "🎬", "Quiz night", ready = false),
+    BILLS("Bills", "💳", "Due-date reminders", ready = false),
+    STRETCH("Stretch Break", "🧘", "5-minute reset", ready = false),
+    RING("Doorbell", "🔔", "Ring pop-ups", ready = false),
+}
+
+object BuiltInApps {
+    fun fromSpoken(s: String): BuiltInApp? = when {
+        s.startsWith("fire") -> BuiltInApp.FIREPLACE
+        s.startsWith("list") -> BuiltInApp.LISTS
+        s.startsWith("timer") -> BuiltInApp.TIMERS
+        s.startsWith("countdown") -> BuiltInApp.COUNTDOWNS
+        s.startsWith("watch") -> BuiltInApp.WATCHLIST
+        s.startsWith("memor") -> BuiltInApp.MEMORY
+        s.startsWith("love") -> BuiltInApp.LOVE_NOTES
+        s.contains("wi") -> BuiltInApp.GUEST_WIFI
+        s.startsWith("would") || s.startsWith("game") -> BuiltInApp.WOULD_YOU_RATHER
+        else -> null
+    }
+}

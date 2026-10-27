@@ -93,6 +93,25 @@ class TvScreensTest {
         compose.mainClock.advanceTimeBy(4000)
         shot("tv-date-night-light")
         compose.runOnUiThread { compose.activity.ui.dateNight = false }
+        compose.runOnUiThread {
+            listOf("Groceries: strawberries, oat milk, pasta, candles", "add call the bank to my to-do list",
+                "countdown to Paris on Dec 12", "countdown to our anniversary in 30 days", "remember that Anna's favorite flowers are peonies",
+                "add The Lost City to our watchlist", "add Crazy Rich Asians to our watchlist", "pasta timer 10 minutes").forEach { app.services.handle(it) }
+            app.home.addNote(dev.glasstv.launcher.data.LoveNote(text = "Can't wait for date night tomorrow. You're my favorite person ♡", from = "Justin"))
+            app.home.setWifi("Anna & Justin", "cozy-pink-2026")
+        }
+        compose.runOnUiThread { compose.activity.ui.appsOpen = true }
+        shot("tv-apps-light")
+        for ((a, name) in listOf(
+            dev.glasstv.launcher.BuiltInApp.LISTS to "lists", dev.glasstv.launcher.BuiltInApp.COUNTDOWNS to "countdowns",
+            dev.glasstv.launcher.BuiltInApp.WATCHLIST to "watchlist", dev.glasstv.launcher.BuiltInApp.LOVE_NOTES to "love-notes",
+            dev.glasstv.launcher.BuiltInApp.GUEST_WIFI to "guest-wifi", dev.glasstv.launcher.BuiltInApp.WOULD_YOU_RATHER to "would-you-rather",
+            dev.glasstv.launcher.BuiltInApp.FIREPLACE to "fireplace", dev.glasstv.launcher.BuiltInApp.TIMERS to "timers",
+        )) {
+            compose.runOnUiThread { compose.activity.ui.openApp = a }
+            shot("tv-app-$name")
+        }
+        compose.runOnUiThread { compose.activity.ui.openApp = null; compose.activity.ui.appsOpen = false }
         compose.runOnUiThread { compose.activity.ui.calendarOpen = true }
         shot("tv-calendar-light")
         compose.runOnUiThread { compose.activity.ui.calendarOpen = false; app.assistant.send("Add movie night with Anna on Saturday at 8:30") }

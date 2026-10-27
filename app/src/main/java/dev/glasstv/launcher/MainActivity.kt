@@ -26,13 +26,16 @@ class LauncherUi {
     var ambient by mutableStateOf(false)
     var dateNight by mutableStateOf(false)
     var calendarOpen by mutableStateOf(false)
+    /** Built-in app currently open (Apps hub tile), or null. */
+    var openApp by mutableStateOf<BuiltInApp?>(null)
+    var appsOpen by mutableStateOf(false)
     /** Short pink toast at the top (event added, reminders). */
     var toast by mutableStateOf<String?>(null)
     /** Bumped when HOME is pressed while already home, so the grid can scroll back to the top. */
     var homeTick by mutableIntStateOf(0)
 
     fun goHome() {
-        aiOpen = false; settingsOpen = false; qrOpen = false; ambient = false; dateNight = false; calendarOpen = false
+        aiOpen = false; settingsOpen = false; qrOpen = false; ambient = false; dateNight = false; calendarOpen = false; openApp = null; appsOpen = false
         homeTick++
     }
 }
@@ -110,6 +113,7 @@ class MainActivity : ComponentActivity() {
             QuickAction.SETTINGS -> { ui.goHome(); ui.settingsOpen = true }
             QuickAction.DATE_NIGHT -> { ui.goHome(); ui.dateNight = true }
             QuickAction.CALENDAR -> { ui.goHome(); ui.calendarOpen = true }
+            QuickAction.APPS -> { ui.goHome(); ui.appsOpen = true }
         }
     }
 

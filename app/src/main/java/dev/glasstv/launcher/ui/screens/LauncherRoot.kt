@@ -139,7 +139,7 @@ fun LauncherRoot(app: GlassApp, ui: LauncherUi) {
         Box(Modifier.fillMaxSize()) {
             OrbBackground(settings.reduceMotion, settings.extraBlur, accent = accent)
 
-            val anyOverlay = ui.aiOpen || ui.settingsOpen || ui.qrOpen || ui.dateNight || ui.calendarOpen
+            val anyOverlay = ui.aiOpen || ui.settingsOpen || ui.qrOpen || ui.dateNight || ui.calendarOpen || ui.appsOpen || ui.openApp != null
             HomeScreen(
                 app, ui, settings, now, Modifier.fillMaxSize(), interactive = !anyOverlay && !ui.ambient,
                 onAccent = { a -> scope.launch { accent = app.appRepo.art(a)?.tint?.takeIf { it != 0 }?.let { Color(it) } } },
@@ -175,6 +175,33 @@ fun LauncherRoot(app: GlassApp, ui: LauncherUi) {
                     onAskGrace = { prompt -> ui.dateNight = false; ui.aiOpen = true; app.assistant.send(prompt) },
                     onClose = { ui.dateNight = false },
                 )
+            }
+
+            // Built-in apps
+            if (ui.appsOpen && ui.openApp == null && !ui.ambient) {
+                dev.glasstv.launcher.ui.apps.AppsHub(onOpen = { a ->
+                    when (a) {
+                        dev.glasstv.launcher.BuiltInApp.CALENDAR -> { ui.appsOpen = false; ui.calendarOpen = true }
+                        dev.glasstv.launcher.BuiltInApp.DATE_NIGHT -> { ui.appsOpen = false; ui.dateNight = true }
+                        else -> ui.openApp = a
+                    }
+                }, onClose = { ui.appsOpen = false })
+            }
+            ui.openApp?.takeIf { !ui.ambient }?.let { a ->
+                val close = { ui.openApp = null }
+                when (a) {
+                    dev.glasstv.launcher.BuiltInApp.LISTS -> dev.glasstv.launcher.ui.apps.ListsApp(app, close)
+                    dev.glasstv.launcher.BuiltInApp.TIMERS -> dev.glasstv.launcher.ui.apps.TimersApp(app, close)
+                    dev.glasstv.launcher.BuiltInApp.COUNTDOWNS -> dev.glasstv.launcher.ui.apps.CountdownsApp(app, close)
+                    dev.glasstv.launcher.BuiltInApp.WATCHLIST -> dev.glasstv.launcher.ui.apps.WatchlistApp(app, close)
+                    dev.glasstv.launcher.BuiltInApp.LOVE_NOTES -> dev.glasstv.launcher.ui.apps.LoveNotesApp(app, close)
+                    dev.glasstv.launcher.BuiltInApp.MEMORY -> dev.glasstv.launcher.ui.apps.MemoryApp(app, close)
+                    dev.glasstv.launcher.BuiltInApp.SLEEP -> dev.glasstv.launcher.ui.apps.SleepApp(app, close)
+                    dev.glasstv.launcher.BuiltInApp.GUEST_WIFI -> dev.glasstv.launcher.ui.apps.GuestWifiApp(app, close)
+                    dev.glasstv.launcher.BuiltInApp.FIREPLACE -> dev.glasstv.launcher.ui.apps.FireplaceApp(settings.reduceMotion, close)
+                    dev.glasstv.launcher.BuiltInApp.WOULD_YOU_RATHER -> dev.glasstv.launcher.ui.apps.WouldYouRatherApp(close)
+                    else -> close()
+                }
             }
 
             if (ui.calendarOpen && !ui.ambient) {
@@ -398,6 +425,7 @@ private fun NavBar(settings: Settings, now: LocalDateTime, ui: LauncherUi, modif
         Spacer(Modifier.width(22.dp))
         Box(Modifier.width(1.dp).height(22.dp).background(c.highlightTop))
         Spacer(Modifier.width(14.dp))
+        NavLink("Apps") { ui.appsOpen = true }
         NavLink("Calendar") { ui.calendarOpen = true }
         NavLink("Ambient") { ui.ambient = true }
         NavLink("Phone remote") { ui.qrOpen = true }

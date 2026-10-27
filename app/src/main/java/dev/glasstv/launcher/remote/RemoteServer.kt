@@ -27,6 +27,8 @@ class RemoteServer(
     private val scope: CoroutineScope,
     /** Favorites (then other apps) as {pkg,label,icon(data URL)} for the phone's shortcut grid. */
     private val shortcuts: suspend () -> org.json.JSONArray,
+    /** A love note typed on the phone. */
+    private val onNote: (String) -> Unit = {},
 ) : NanoWSD(PORT) {
 
     private val pairing = Pairing()
@@ -158,6 +160,7 @@ class RemoteServer(
                 "text" -> msg.optString("v").take(500).let {
                     RemoteBus.send(RemoteCommand.Text(it, msg.optBoolean("submit")))
                 }
+                "note" -> msg.optString("v").trim().take(280).takeIf { it.isNotEmpty() }?.let { scope.launch { onNote(it) } }
                 "backspace" -> RemoteBus.send(RemoteCommand.Backspace)
                 "launch" -> msg.optString("pkg").takeIf { it.isNotBlank() }?.let { RemoteBus.send(RemoteCommand.Launch(it)) }
                 "action" -> runCatching { QuickAction.valueOf(msg.optString("a").uppercase().replace("DATENIGHT", "DATE_NIGHT")) }.getOrNull()
