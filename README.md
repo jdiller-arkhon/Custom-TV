@@ -1,6 +1,6 @@
 # Glass TV
 
-A custom home screen for a TCL Google TV: Apple-style frosted glass in baby pink with dark cocoa-brown accents, a local-AI assistant (Ollama on your PC), and a phone remote that runs in the phone's browser. Installs straight on the TV and runs with no PC attached. Only the assistant needs the PC.
+A custom home screen for a TCL Google TV: soft, cozy baby-pink and cocoa design, a local-AI assistant (Ollama on your PC), and a phone remote that runs in the phone's browser. Installs straight on the TV and runs with no PC attached. Only the assistant needs the PC.
 
 Kotlin · Jetpack Compose for TV · single module · 6 runtime dependencies (Compose, TV Material, DataStore, coroutines, NanoHTTPD, ZXing).
 
@@ -36,7 +36,7 @@ Regenerate: `./gradlew :app:testDebugUnitTest -PtvScreens --tests '*TvScreensTes
 
 | | |
 |---|---|
-| **Home** | Apple TV–style and personal: greeting, clock, weather and your profile initial; **Jump back in** cards for the apps you opened last (their real TV banners) next to an **Ask Glass** assistant card; a frosted search bar (filters apps live; OK launches or asks the assistant); then your favorites row and the rest of your apps. |
+| **Home** | A cozy “room”: **Grace's nook** on the left (Grace, Anna's greeting, Grace's suggestions, the Ask-Grace/search box, controls) and a **Spotlight** stage on the right that shows whichever app is focused, while the background orbs take on that app's colour. Favorites float on a gentle wave of rounded bubble icons beneath; everything else sits in a quieter row. Solid, soft cards (no glass). |
 | **Apps** | All leanback apps, then phone-only launcher apps. Live updates on install/uninstall. Default favorites are whichever of Netflix, YouTube, Disney+, Max, Prime Video, Spotify, Plex and Twitch are installed. **Long-press OK** on a tile to pin or unpin it. Reorder in Settings. |
 | **Focus** | Focused tile scales 1.08× with a solid rose ring and a pink glow. |
 

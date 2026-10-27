@@ -11,6 +11,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -50,9 +51,13 @@ private val orbs = listOf(
  * phase, so a frame costs four gradient fills and zero recompositions.
  */
 @Composable
-fun OrbBackground(reduceMotion: Boolean, extraBlur: Boolean, modifier: Modifier = Modifier) {
+fun OrbBackground(reduceMotion: Boolean, extraBlur: Boolean, modifier: Modifier = Modifier, accent: Color? = null) {
     val c = LocalGlass.current
-    val colors = remember(c) { listOf(c.pink, c.lilac, c.latte, c.rose) }
+    // Mood lighting: the two big orbs lean toward the focused app's colour.
+    val target = accent?.let { androidx.compose.ui.graphics.lerp(c.pink, it, 0.55f) } ?: c.pink
+    val lead by androidx.compose.animation.animateColorAsState(target, androidx.compose.animation.core.tween(900), label = "accent")
+    val second by androidx.compose.animation.animateColorAsState(accent?.let { androidx.compose.ui.graphics.lerp(c.lilac, it, 0.35f) } ?: c.lilac, androidx.compose.animation.core.tween(1200), label = "accent2")
+    val colors = listOf(lead, second, c.latte, c.rose)
     val t: State<Float> = if (reduceMotion) {
         remember { mutableFloatStateOfConst(0.12f) }
     } else {

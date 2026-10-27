@@ -44,10 +44,10 @@ val LightColors = GlassColors(
     latte = Color(0xFFDDB8A4),
     text = Color(0xFF3E2420),
     textSoft = Color(0xFF3E2420).copy(alpha = 0.66f),
-    glassFill = Color.White.copy(alpha = 0.40f),
-    glassFillFocused = Color.White.copy(alpha = 0.62f),
-    highlightTop = Color.White.copy(alpha = 0.85f),
-    highlightBottom = Color.White.copy(alpha = 0.25f),
+    glassFill = Color(0xFFFFF4F6),        // solid cream-blush card
+    glassFillFocused = Color(0xFFFFFFFF),
+    highlightTop = Color(0xFFF3D3DE),     // soft flat outline, no gloss
+    highlightBottom = Color(0xFFF3D3DE),
     shadow = Color(0xFFE58FB0).copy(alpha = 0.35f),
     orbAlpha = 0.85f,
 )
@@ -63,10 +63,10 @@ val DarkColors = GlassColors(
     latte = Color(0xFF8A5A44),
     text = Color(0xFFFCEAF1),
     textSoft = Color(0xFFFCEAF1).copy(alpha = 0.66f),
-    glassFill = Color(0xFFFFBED7).copy(alpha = 0.10f),
-    glassFillFocused = Color(0xFFFFBED7).copy(alpha = 0.20f),
-    highlightTop = Color.White.copy(alpha = 0.35f),
-    highlightBottom = Color.White.copy(alpha = 0.06f),
+    glassFill = Color(0xFF34222A),        // solid cocoa-plum card
+    glassFillFocused = Color(0xFF45303A),
+    highlightTop = Color(0xFF4E3641),
+    highlightBottom = Color(0xFF4E3641),
     shadow = Color(0xFFFF8FC0).copy(alpha = 0.30f),
     orbAlpha = 0.55f,
 )

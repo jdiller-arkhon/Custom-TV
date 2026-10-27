@@ -29,7 +29,8 @@ data class TvApp(
 )
 
 /** Real, system-provided artwork: the app's TV banner if it ships one, otherwise its launcher icon. */
-data class AppArt(val image: ImageBitmap, val isBanner: Boolean)
+/** [tint] is the art's average colour, used to mood-light the room when the app is focused. */
+data class AppArt(val image: ImageBitmap, val isBanner: Boolean, val tint: Int = 0)
 
 class AppRepository(private val context: Context, private val scope: CoroutineScope) {
     private val pm = context.packageManager
@@ -90,9 +91,9 @@ class AppRepository(private val context: Context, private val scope: CoroutineSc
                 val banner = runCatching { pm.getActivityBanner(app.component) }.getOrNull()
                     ?: runCatching { pm.getApplicationBanner(app.packageName) }.getOrNull()
                 val art = if (banner != null) {
-                    AppArt(banner.toBitmap(320, 180).asImageBitmap(), true)
+                    banner.toBitmap(320, 180).let { AppArt(it.asImageBitmap(), true, averageColor(it)) }
                 } else {
-                    AppArt(pm.getActivityIcon(app.component).toBitmap(192, 192).asImageBitmap(), false)
+                    pm.getActivityIcon(app.component).toBitmap(192, 192).let { AppArt(it.asImageBitmap(), false, averageColor(it)) }
                 }
                 artCache.put(app.packageName, art)
                 art
@@ -142,6 +143,22 @@ class AppRepository(private val context: Context, private val scope: CoroutineSc
             listOf("tv.twitch.android.viewer", "tv.twitch.android.app"),
         )
     }
+}
+
+/** Average of opaque, non-near-white/black pixels: the colour people perceive as the brand colour. */
+private fun averageColor(b: Bitmap): Int {
+    val s = Bitmap.createScaledBitmap(b, 16, 16, true)
+    var r = 0L; var g = 0L; var bl = 0L; var n = 0
+    for (y in 0 until 16) for (x in 0 until 16) {
+        val p = s.getPixel(x, y)
+        if ((p ushr 24) < 200) continue
+        val pr = (p shr 16) and 255; val pg = (p shr 8) and 255; val pb = p and 255
+        val mx = maxOf(pr, pg, pb); val mn = minOf(pr, pg, pb)
+        if (mx - mn < 30) continue // skip greys/whites/blacks
+        r += pr; g += pg; bl += pb; n++
+    }
+    if (n == 0) return 0
+    return (0xFF shl 24) or ((r / n).toInt() shl 16) or ((g / n).toInt() shl 8) or (bl / n).toInt()
 }
 
 private fun Drawable.toBitmap(w: Int, h: Int): Bitmap {
