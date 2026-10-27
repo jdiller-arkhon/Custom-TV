@@ -37,41 +37,41 @@ data class GlassColors(
 
 val LightColors = GlassColors(
     isDark = false,
-    background = Color(0xFFF6EFE9),       // ivory paper
-    pink = Color(0xFFF2D4D7),             // blush
-    rose = Color(0xFFB0304A),             // rouge
-    lilac = Color(0xFFE7DCE4),
-    peach = Color(0xFFF1DED2),
-    cocoa = Color(0xFF3A2226),
-    latte = Color(0xFFD9C3B4),
-    gold = Color(0xFFB08A50),             // champagne
-    text = Color(0xFF1C1416),             // ink
-    textSoft = Color(0xFF1C1416).copy(alpha = 0.58f),
-    glassFill = Color(0xFFFFFBF8),        // paper card
+    background = Color(0xFFFFF8FB),       // blush white
+    pink = Color(0xFFFCE4EE),             // pink tint
+    rose = Color(0xFFEC6AA0),             // accent
+    lilac = Color(0xFFF3E8FA),
+    peach = Color(0xFFFFEDE6),
+    cocoa = Color(0xFF6B3D52),
+    latte = Color(0xFFF1D9E3),
+    gold = Color(0xFFD99AB5),
+    text = Color(0xFF2A1A22),
+    textSoft = Color(0xFF8A6F7B),
+    glassFill = Color(0xFFFFFFFF),        // card
     glassFillFocused = Color(0xFFFFFFFF),
-    highlightTop = Color(0xFFE4D6CB),     // printed hairline
-    highlightBottom = Color(0xFFE4D6CB),
-    shadow = Color(0xFFB0304A).copy(alpha = 0.16f),
+    highlightTop = Color(0xFFF6DCE6),     // 1px border
+    highlightBottom = Color(0xFFF6DCE6),
+    shadow = Color(0xFFEC6AA0).copy(alpha = 0.18f),
     orbAlpha = 0f,
 )
 
 val DarkColors = GlassColors(
     isDark = true,
-    background = Color(0xFF141012),       // velvet noir
-    pink = Color(0xFF4A2630),
-    rose = Color(0xFFE0607A),
-    lilac = Color(0xFF2A2026),
-    peach = Color(0xFF2E2220),
-    cocoa = Color(0xFF6B3A44),
-    latte = Color(0xFF5A4438),
-    gold = Color(0xFFD9BB86),
-    text = Color(0xFFF3E9E2),
-    textSoft = Color(0xFFF3E9E2).copy(alpha = 0.6f),
-    glassFill = Color(0xFF1E181A),
-    glassFillFocused = Color(0xFF2A2124),
-    highlightTop = Color(0xFF3A2E31),
-    highlightBottom = Color(0xFF3A2E31),
-    shadow = Color(0xFFE0607A).copy(alpha = 0.18f),
+    background = Color(0xFF161014),
+    pink = Color(0xFF3A2230),
+    rose = Color(0xFFF27AAE),
+    lilac = Color(0xFF241C28),
+    peach = Color(0xFF2A1E1E),
+    cocoa = Color(0xFFB0728E),
+    latte = Color(0xFF3A2A32),
+    gold = Color(0xFFE7A9C4),
+    text = Color(0xFFF8EEF2),
+    textSoft = Color(0xFFB59AA7),
+    glassFill = Color(0xFF1F181C),
+    glassFillFocused = Color(0xFF281F24),
+    highlightTop = Color(0xFF34262D),
+    highlightBottom = Color(0xFF34262D),
+    shadow = Color(0xFFF27AAE).copy(alpha = 0.20f),
     orbAlpha = 0f,
 )
 
@@ -99,6 +99,11 @@ object GlassType {
     val body = TextStyle(fontFamily = Figtree, fontWeight = FontWeight.Normal, fontSize = 20.sp, lineHeight = 28.sp)
     val label = TextStyle(fontFamily = Figtree, fontWeight = FontWeight.Medium, fontSize = 17.sp)
     val small = TextStyle(fontFamily = Figtree, fontWeight = FontWeight.Normal, fontSize = 15.sp)
+    // Clean SaaS
+    val hero = TextStyle(fontFamily = Figtree, fontWeight = FontWeight.SemiBold, fontSize = 44.sp, letterSpacing = (-1.1).sp)
+    val heroSub = TextStyle(fontFamily = Figtree, fontWeight = FontWeight.Normal, fontSize = 21.sp)
+    val nav = TextStyle(fontFamily = Figtree, fontWeight = FontWeight.Medium, fontSize = 16.sp)
+    val wordmark = TextStyle(fontFamily = Figtree, fontWeight = FontWeight.Bold, fontSize = 24.sp, letterSpacing = (-0.5).sp)
     // Editorial
     val masthead = TextStyle(fontFamily = Fraunces, fontWeight = FontWeight.Light, fontSize = 118.sp, letterSpacing = 14.sp, lineHeight = 112.sp)
     val kicker = TextStyle(fontFamily = Figtree, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, letterSpacing = 4.sp)

@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.dp
 import dev.glasstv.launcher.ui.theme.LocalGlass
 import kotlin.math.PI
 import kotlin.math.cos
@@ -52,19 +53,29 @@ private val orbs = listOf(
  */
 @Composable
 fun OrbBackground(reduceMotion: Boolean, extraBlur: Boolean, modifier: Modifier = Modifier, accent: Color? = null) {
-    // "Paper" background for the editorial design: flat stock with a faint warm vignette that
-    // picks up the focused app's colour. Static (no per-frame work) — the motion lives in the page.
+    // Clean SaaS backdrop: blush-white with a faint dot grid and a soft pink glow at the top
+    // (Vercel/Perplexity-style hero light). Static; the glow leans toward the focused app's colour.
     val c = LocalGlass.current
-    val tint by androidx.compose.animation.animateColorAsState(
-        (accent ?: c.rose).copy(alpha = if (c.isDark) 0.16f else 0.07f), tween(900), label = "paperTint",
+    val glow by androidx.compose.animation.animateColorAsState(
+        androidx.compose.ui.graphics.lerp(c.rose, accent ?: c.rose, 0.35f).copy(alpha = if (c.isDark) 0.22f else 0.16f), tween(900), label = "glow",
     )
     Canvas(modifier.fillMaxSize()) {
         drawRect(c.background)
+        val step = 28.dp.toPx()
+        val dot = (if (c.isDark) Color.White else c.cocoa).copy(alpha = if (c.isDark) 0.05f else 0.07f)
+        var y = step / 2
+        while (y < size.height) {
+            var x = step / 2
+            while (x < size.width) { drawCircle(dot, 1.2.dp.toPx(), Offset(x, y)); x += step }
+            y += step
+        }
         drawRect(
             Brush.radialGradient(
-                listOf(Color.Transparent, tint),
-                center = Offset(size.width * 0.3f, size.height * 0.45f), radius = maxOf(size.width, size.height) * 0.85f,
+                listOf(glow, Color.Transparent),
+                center = Offset(size.width / 2, -size.height * 0.05f), radius = size.width * 0.55f,
             )
         )
+        // fade the dots out toward the bottom so the page feels calm
+        drawRect(Brush.verticalGradient(0.45f to Color.Transparent, 1f to c.background))
     }
 }

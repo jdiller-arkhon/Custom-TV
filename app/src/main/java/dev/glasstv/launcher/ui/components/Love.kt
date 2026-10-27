@@ -125,3 +125,8 @@ fun BlinkingGrace(size: Dp, animate: Boolean, modifier: Modifier = Modifier) {
     }
     CuteOrb(size, modifier, eyesOpen = open)
 }
+
+/** Small helper so other files can draw a heart filling their canvas. */
+object HeartDraw {
+    fun DrawScope.heart(color: Color) = drawHeart(center, size.width, color)
+}

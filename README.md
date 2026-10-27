@@ -1,6 +1,6 @@
 # Glass TV
 
-A custom home screen for a TCL Google TV: editorial magazine design in ivory, rouge and champagne, a local-AI assistant (Ollama on your PC), and a phone remote that runs in the phone's browser. Installs straight on the TV and runs with no PC attached. Only the assistant needs the PC.
+A custom home screen for a TCL Google TV: cozy, pink, clean SaaS-style design, a local-AI assistant (Ollama on your PC), and a phone remote that runs in the phone's browser. Installs straight on the TV and runs with no PC attached. Only the assistant needs the PC.
 
 Kotlin · Jetpack Compose for TV · single module · 6 runtime dependencies (Compose, TV Material, DataStore, coroutines, NanoHTTPD, ZXing).
 
@@ -36,8 +36,8 @@ Regenerate: `./gradlew :app:testDebugUnitTest -PtvScreens --tests '*TvScreensTes
 
 | | |
 |---|---|
-| **Home** | **The Anna Edition**: the home screen as a luxury magazine page. ANNA masthead with issue number and date; the focused app as the *cover story*; favorites as a numbered *In this issue* contents list with real icons; “Dear Grace, …” letter line to ask or search; Justin's signed note in the margin. Ivory paper, ink, rouge and champagne (velvet noir in dark). |
-| **Animations** | Print-reveal on every return home (rules draw across, masthead letters settle, contents rise in sequence); slow Ken Burns drift on the cover; rouge rule draws under the focused entry; shimmer on Justin's note. All off with *Reduce motion*. |
+| **Home** | Cozy, pink, clean SaaS (Apple × Vercel × Perplexity): a quiet top bar (anna · with Grace, time, Ambient / Phone remote / Settings); a centred “Good evening, Anna ♡” hero with one big **Ask Grace** box and three suggestion chips; one calm row of app cards with real icons; Justin's note at the foot. Blush-white with a faint dot grid and a soft pink glow (dark: deep plum). |
+| **Animations** | Gentle fade-up on each return home, Grace blinks, springy pink-ring focus on cards. All off with *Reduce motion*. |
 | **Apps** | All leanback apps, then phone-only launcher apps. Live updates on install/uninstall. Default favorites are whichever of Netflix, YouTube, Disney+, Max, Prime Video, Spotify, Plex and Twitch are installed. **Long-press OK** on a tile to pin or unpin it. Reorder in Settings. |
 | **Focus** | Focused tile scales 1.08× with a solid rose ring and a pink glow. |
 
