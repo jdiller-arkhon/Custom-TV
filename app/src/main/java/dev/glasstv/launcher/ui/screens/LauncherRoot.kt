@@ -322,7 +322,7 @@ private fun Dock(ui: LauncherUi, modifier: Modifier) {
         GlassButton(onClick = { ui.aiOpen = true }, shape = CircleShape, modifier = Modifier.size(60.dp)) {
             Box(
                 Modifier.size(40.dp).background(
-                    Brush.radialGradient(listOf(Color.White, c.pink, c.rose, c.lilac)), CircleShape,
+                    Brush.radialGradient(listOf(Color.White, c.pink, c.rose, c.cocoa)), CircleShape,
                 )
             )
         }

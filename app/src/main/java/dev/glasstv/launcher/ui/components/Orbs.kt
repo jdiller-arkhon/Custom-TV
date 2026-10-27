@@ -29,7 +29,7 @@ private class Orb(val x: Float, val y: Float, val r: Float, val dx: Float, val d
 private val orbs = listOf(
     Orb(0.18f, 0.22f, 0.42f, 0.10f, 0.08f, 1, 0.00f), // pink
     Orb(0.82f, 0.30f, 0.38f, 0.08f, 0.10f, 1, 0.33f), // lilac
-    Orb(0.60f, 0.86f, 0.36f, 0.12f, 0.06f, 2, 0.66f), // peach
+    Orb(0.60f, 0.86f, 0.36f, 0.12f, 0.06f, 2, 0.66f), // latte (brown)
     Orb(0.30f, 0.80f, 0.28f, 0.07f, 0.09f, 1, 0.50f), // rose
 )
 
@@ -43,7 +43,7 @@ private val orbs = listOf(
 @Composable
 fun OrbBackground(reduceMotion: Boolean, extraBlur: Boolean, modifier: Modifier = Modifier) {
     val c = LocalGlass.current
-    val colors = remember(c) { listOf(c.pink, c.lilac, c.peach, c.rose) }
+    val colors = remember(c) { listOf(c.pink, c.lilac, c.latte, c.rose) }
     val t: State<Float> = if (reduceMotion) {
         remember { mutableFloatStateOfConst(0.12f) }
     } else {

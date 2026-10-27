@@ -1,6 +1,6 @@
 # Glass TV
 
-A custom home screen for a TCL Google TV: Apple-style frosted glass in baby pink, a local-AI assistant (Ollama on your PC), and a phone remote that runs in the phone's browser. Installs straight on the TV and runs with no PC attached. Only the assistant needs the PC.
+A custom home screen for a TCL Google TV: Apple-style frosted glass in baby pink with dark cocoa-brown accents, a local-AI assistant (Ollama on your PC), and a phone remote that runs in the phone's browser. Installs straight on the TV and runs with no PC attached. Only the assistant needs the PC.
 
 Kotlin · Jetpack Compose for TV · single module · 6 runtime dependencies (Compose, TV Material, DataStore, coroutines, NanoHTTPD, ZXing).
 

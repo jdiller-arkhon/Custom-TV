@@ -19,7 +19,7 @@ import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 
-/** Plum-on-white QR (high contrast so any phone camera reads it off a TV). */
+/** Cocoa-on-white QR (high contrast so any phone camera reads it off a TV). */
 @Composable
 fun QrCode(content: String, size: Dp, modifier: Modifier = Modifier) {
     val matrix = remember(content) {
@@ -32,7 +32,7 @@ fun QrCode(content: String, size: Dp, modifier: Modifier = Modifier) {
         modifier.clip(RoundedCornerShape(20.dp)).background(Color.White).padding(14.dp).size(size)
     ) {
         val cell = this.size.width / matrix.width
-        val plum = Color(0xFF3B1F33)
+        val plum = Color(0xFF3E2420)
         for (y in 0 until matrix.height) for (x in 0 until matrix.width) {
             if (matrix.get(x, y)) drawRect(plum, Offset(x * cell, y * cell), Size(cell + 0.5f, cell + 0.5f))
         }

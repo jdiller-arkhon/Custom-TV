@@ -4,21 +4,21 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#FBE8EE" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#1E1020" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#1E1411" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Glass TV Remote</title>
 <style>
 :root{
-  --bg:#FBE8EE;--pink:#F7C6D9;--rose:#E58FB0;--lilac:#D9C8F5;--peach:#FFD3C4;
-  --text:#3B1F33;--soft:rgba(59,31,51,.6);--faint:rgba(59,31,51,.35);
+  --bg:#FBE8EE;--pink:#F7C6D9;--rose:#E58FB0;--lilac:#D9C8F5;--peach:#FFD3C4;--cocoa:#4A2C24;--latte:#C9A08A;
+  --text:#3E2420;--soft:rgba(62,36,32,.62);--faint:rgba(62,36,32,.35);
   --glass:rgba(255,255,255,.42);--glass-2:rgba(255,255,255,.62);--hi:rgba(255,255,255,.9);--lo:rgba(255,255,255,.25);
-  --shadow:rgba(229,143,176,.30);--glow:rgba(229,143,176,.55);--orb:.8;
+  --shadow:rgba(176,112,122,.30);--glow:rgba(229,143,176,.55);--orb:.8;
   --serif:"Fraunces","Iowan Old Style","Palatino Linotype",Georgia,serif;
   --sans:"Figtree",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
 }
 @media (prefers-color-scheme:dark){:root{
-  --bg:#1E1020;--pink:#F07BAA;--rose:#FF8FC0;--lilac:#A98BEA;--peach:#F2A58E;
+  --bg:#1E1411;--pink:#F07BAA;--rose:#FF8FC0;--lilac:#A98BEA;--peach:#F2A58E;--cocoa:#5C3A2E;--latte:#8A5A44;
   --text:#FCEAF1;--soft:rgba(252,234,241,.62);--faint:rgba(252,234,241,.3);
   --glass:rgba(255,255,255,.09);--glass-2:rgba(255,255,255,.16);--hi:rgba(255,255,255,.28);--lo:rgba(255,255,255,.05);
   --shadow:rgba(255,143,192,.18);--glow:rgba(255,143,192,.5);--orb:.5}}
@@ -31,7 +31,7 @@ svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke
 .orbs i{position:absolute;border-radius:50%;animation:drift 26s ease-in-out infinite alternate}
 .orbs i:nth-child(1){width:70vmax;height:70vmax;left:-10%;top:-12%;background:radial-gradient(circle,var(--pink),transparent 68%)}
 .orbs i:nth-child(2){width:60vmax;height:60vmax;right:-15%;top:28%;background:radial-gradient(circle,var(--lilac),transparent 68%);animation-duration:32s;animation-delay:-8s}
-.orbs i:nth-child(3){width:55vmax;height:55vmax;left:5%;bottom:-18%;background:radial-gradient(circle,var(--peach),transparent 68%);animation-duration:38s;animation-delay:-16s}
+.orbs i:nth-child(3){width:55vmax;height:55vmax;left:5%;bottom:-18%;background:radial-gradient(circle,var(--latte),transparent 68%);animation-duration:38s;animation-delay:-16s}
 @keyframes drift{0%{transform:translate(0,0) scale(1)}50%{transform:translate(6vw,4vh) scale(1.08)}100%{transform:translate(-4vw,7vh) scale(.95)}}
 @media (prefers-reduced-motion:reduce){.orbs i{animation:none}}
 
@@ -64,18 +64,18 @@ button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:poin
 .qas{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .qa{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 4px 12px;border-radius:24px;font-size:12.5px;font-weight:500;transition:transform .12s cubic-bezier(.3,1.6,.6,1),box-shadow .2s}
 .qa .ic{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--glass-2);box-shadow:inset 0 1px 0 var(--hi)}
-.orb-ic{background:radial-gradient(circle at 35% 30%,#fff 0 12%,var(--pink) 42%,var(--rose) 72%,var(--lilac))!important;box-shadow:0 0 18px var(--glow)!important}
+.orb-ic{background:radial-gradient(circle at 35% 30%,#fff 0 12%,var(--pink) 42%,var(--rose) 70%,var(--cocoa))!important;box-shadow:0 0 18px var(--glow)!important}
 
 /* D-pad */
 .dpad{position:relative;width:min(80vw,300px);aspect-ratio:1;margin:4px auto 0;border-radius:50%}
 .dpad::before{content:"";position:absolute;inset:-3px;border-radius:50%;z-index:-1;opacity:.6;
-  background:conic-gradient(from 210deg,var(--pink),var(--lilac),var(--peach),var(--rose),var(--pink));filter:blur(10px)}
+  background:conic-gradient(from 210deg,var(--pink),var(--lilac),var(--latte),var(--rose),var(--pink));filter:blur(10px)}
 .dpad .d{position:absolute;width:30%;height:30%;display:grid;place-items:center;border-radius:50%;color:var(--soft);transition:color .15s,transform .12s}
 .dpad .d svg{width:30px;height:30px;stroke-width:2.2}
 .dpad .d.hit{color:var(--rose);transform:scale(.88)}
 .dpad .up{top:3%;left:35%}.dpad .down{bottom:3%;left:35%}.dpad .left{left:3%;top:35%}.dpad .right{right:3%;top:35%}
 .dpad .ok{position:absolute;top:29%;left:29%;width:42%;height:42%;border-radius:50%;font:600 19px/1 var(--sans);letter-spacing:.06em;color:#fff;
-  background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.95) 0 8%,var(--pink) 38%,var(--rose) 78%);
+  background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.95) 0 8%,var(--pink) 36%,var(--rose) 70%,var(--cocoa) 118%);
   box-shadow:0 10px 26px var(--glow),inset 0 2px 0 rgba(255,255,255,.7),inset 0 -6px 14px rgba(160,60,110,.25);
   text-shadow:0 1px 2px rgba(120,30,80,.35);transition:transform .12s cubic-bezier(.3,1.6,.6,1)}
 .dpad .ok.hit{transform:scale(.92)}
@@ -88,7 +88,14 @@ button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:poin
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 .tile{display:flex;flex-direction:column;align-items:center;gap:7px;padding:12px 4px 10px;border-radius:22px;min-width:0;transition:transform .12s cubic-bezier(.3,1.6,.6,1),box-shadow .2s}
 .tile img,.tile .ph{width:52px;height:52px;border-radius:15px;object-fit:cover;box-shadow:0 6px 16px var(--shadow)}
-.tile .ph{display:grid;place-items:center;font:600 22px/1 var(--serif);background:linear-gradient(135deg,var(--pink),var(--lilac));color:#fff}
+.tile .ph{display:grid;place-items:center;font:600 22px/1 var(--serif);background:linear-gradient(135deg,var(--rose),var(--cocoa));color:#fff}
+.pink .tile img{filter:url(#pinkify)}
+.tile img{transition:filter .3s}
+.h2row{display:flex;align-items:center;justify-content:space-between;margin-right:4px}
+.switch{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--soft);padding:6px 10px 6px 12px;border-radius:999px}
+.switch i{width:34px;height:20px;border-radius:99px;background:var(--faint);position:relative;transition:.2s}
+.switch i::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.2s}
+.pink .switch i{background:var(--rose)}.pink .switch i::after{left:16px}
 .tile b{font-size:12px;font-weight:500;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .empty{padding:28px;text-align:center;color:var(--soft);font-size:14px}
 
@@ -97,7 +104,7 @@ textarea{width:100%;min-height:120px;resize:none;font:inherit;font-size:18px;col
   border-radius:24px;padding:16px 18px;outline:none;-webkit-user-select:text;user-select:text;transition:box-shadow .2s,border-color .2s}
 textarea::placeholder{color:var(--faint)}
 textarea:focus{border-color:var(--rose);box-shadow:0 0 0 4px var(--shadow)}
-.primary{color:#fff;background:linear-gradient(135deg,var(--rose),#D477A6);box-shadow:0 10px 24px var(--glow)}
+.primary{color:#fff;background:linear-gradient(135deg,var(--rose),#B5687E 60%,var(--cocoa));box-shadow:0 10px 24px var(--glow)}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{padding:10px 15px;border-radius:999px;font-size:14px;transition:transform .12s}
 .chip.hit{transform:scale(.94)}
@@ -135,6 +142,16 @@ nav button.sel svg{stroke:var(--rose)}
 <body>
 <div class="orbs"><i></i><i></i><i></i></div>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="pinkify" color-interpolation-filters="sRGB">
+    <feColorMatrix type="matrix" values=".2126 .7152 .0722 0 0  .2126 .7152 .0722 0 0  .2126 .7152 .0722 0 0  0 0 0 1 0"/>
+    <feComponentTransfer>
+      <feFuncR type="table" tableValues="0.29 0.72 0.94 1.00"/>
+      <feFuncG type="table" tableValues="0.17 0.38 0.72 0.95"/>
+      <feFuncB type="table" tableValues="0.14 0.42 0.80 0.97"/>
+    </feComponentTransfer>
+  </filter>
+</svg>
 <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
   <symbol id="i-up" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></symbol>
   <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
@@ -197,7 +214,7 @@ nav button.sel svg{stroke:var(--rose)}
 
   <!-- SHORTCUTS -->
   <section class="pane" id="apps">
-    <h2>Favorites</h2>
+    <div class="h2row"><h2>Favorites</h2><button class="switch glass" id="pinkBtn" aria-label="Pink icons">Pink icons <i></i></button></div>
     <div class="grid" id="fav"><div class="empty glass" style="grid-column:1/-1">Loading your apps…</div></div>
     <h2 id="moreH" hidden>More apps</h2>
     <div class="grid" id="more"></div>
@@ -361,6 +378,12 @@ nav button.sel svg{stroke:var(--rose)}
   press($('#bs'), () => { send({ t: 'backspace' }); txt.value = txt.value.slice(0, -1); }, true);
   $$('[data-say]').forEach(b => b.onclick = () => { if (send({ t: 'text', v: b.dataset.say, submit: true })) { vib(); toast('Asking the assistant…'); } });
   $$('[data-fill]').forEach(b => b.onclick = () => { txt.value = b.dataset.fill; txt.focus(); txt.setSelectionRange(txt.value.length, txt.value.length); });
+
+  // Pink icons: duotone filter over the real icons, remembered per phone (on by default).
+  const PK = 'glasstv.pinkIcons';
+  const setPink = on => { document.body.classList.toggle('pink', on); try { localStorage.setItem(PK, on ? '1' : '0') } catch (e) {} };
+  setPink((() => { try { return localStorage.getItem(PK) !== '0' } catch (e) { return true } })());
+  $('#pinkBtn').onclick = () => { vib(); setPink(!document.body.classList.contains('pink')); };
 
   connect();
 })();
