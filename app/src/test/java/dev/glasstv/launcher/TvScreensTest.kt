@@ -13,6 +13,7 @@ import android.graphics.RectF
 import android.graphics.Typeface
 import android.graphics.drawable.BitmapDrawable
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.onRoot
 import androidx.test.core.app.ApplicationProvider
 import com.github.takahirom.roborazzi.captureRoboImage
@@ -72,6 +73,8 @@ class TvScreensTest {
         androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().setInTouchMode(false) // TVs have no touch mode
         compose.runOnUiThread { compose.activity.ui.qrOpen = false }
         shot("tv-home-light")
+        // Regression guard: the home screen must open with a tile focused (D-pad users need a starting point).
+        compose.onAllNodes(androidx.compose.ui.test.isFocused()).assertCountEquals(1)
         compose.runOnUiThread { compose.activity.ui.aiOpen = true }
         shot("tv-assistant-light")
         compose.runOnUiThread { compose.activity.ui.aiOpen = false; compose.activity.ui.settingsOpen = true }

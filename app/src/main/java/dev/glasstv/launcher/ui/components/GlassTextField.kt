@@ -40,6 +40,7 @@ fun GlassTextField(
     placeholder: String,
     modifier: Modifier = Modifier,
     onChange: ((String) -> Unit)? = null,
+    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(18.dp),
 ) {
     val c = LocalGlass.current
     var editing by remember { mutableStateOf(false) }
@@ -83,7 +84,7 @@ fun GlassTextField(
                     .fillMaxWidth()
                     .focusRequester(fieldFocus)
                     .onFocusChanged { if (!it.isFocused && editing) { commit(text.text); editing = false } }
-                    .glassPanel(RoundedCornerShape(18.dp), 4.dp)
+                    .glassPanel(shape, 4.dp)
                     .padding(horizontal = 20.dp, vertical = 14.dp),
             )
         } else {
@@ -92,7 +93,7 @@ fun GlassTextField(
             }
             GlassButton(
                 onClick = { editing = true },
-                shape = RoundedCornerShape(18.dp),
+                shape = shape,
                 focusScale = 1.03f,
                 modifier = Modifier.fillMaxWidth().focusRequester(buttonFocus),
             ) {

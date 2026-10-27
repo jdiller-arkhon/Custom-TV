@@ -36,10 +36,10 @@ Regenerate: `./gradlew :app:testDebugUnitTest -PtvScreens --tests '*TvScreensTes
 
 | | |
 |---|---|
-| **Home** | Greeting with an optional name, large Fraunces clock and date, Open-Meteo weather (no key), settings gear. Grid of glass tiles using each app's real TV banner or icon. Favorites first. |
+| **Home** | tvOS-style: clock and greeting, a row of large rounded favorite tiles (name appears under the focused one), a frosted search bar underneath (filters apps live; OK launches or asks the assistant), then all other apps. Controls (assistant, ambient, phone remote, settings) sit top-right. |
 | **Apps** | All leanback apps, then phone-only launcher apps. Live updates on install/uninstall. Default favorites are whichever of Netflix, YouTube, Disney+, Max, Prime Video, Spotify, Plex and Twitch are installed. **Long-press OK** on a tile to pin or unpin it. Reorder in Settings. |
 | **Focus** | Focused tile scales 1.08× with a solid rose ring and a pink glow. |
-| **Dock** | AI orb · Ambient · Settings · Phone remote. |
+
 | **Assistant** | Glass sheet slides in from the right. Streams from Ollama. Quick-prompt chips. "open Netflix" style commands run locally. Plain-language error card with the fix when the PC is unreachable. |
 | **Phone remote** | Pink-glass web remote with app **shortcuts** (real icons) and quick actions (Assistant, Ambient, Settings), plus D-pad, OK, back, home, media keys, volume, touchpad, keyboard and dictation. WebSocket with auto-reconnect. 4-digit pairing, remembered phones, revoke in Settings. |
 | **Ambient** | After 3 idle minutes: a big clock over the drifting orbs. Any button wakes it. |
