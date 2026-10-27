@@ -228,7 +228,7 @@ private fun HomeScreen(
         Spacer(Modifier.height(14.dp))
 
         if (query.isBlank()) {
-            SectionHeader(if (recent.isNotEmpty()) "Jump back in" else "Up next")
+            SectionHeader(if (recent.isNotEmpty()) "Jump back in ✨" else "Pick up where you like")
             Row(Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 6.dp), horizontalArrangement = Arrangement.spacedBy(28.dp)) {
                 hero.forEachIndexed { i, a ->
                     HeroCard(app, a, Modifier.weight(1f), focus = if (i == 0) firstFocus else null)
@@ -252,6 +252,8 @@ private fun HomeScreen(
                 GlassType.body, Modifier.padding(12.dp), color = LocalGlass.current.textSoft,
             ) else AppRow(app, results, null, ::togglePin)
         } else {
+            Spacer(Modifier.height(6.dp))
+            SectionHeader(if (pinned.isNotEmpty()) "Your favorites ♡" else "Your apps")
             AppRow(app, if (pinned.isNotEmpty()) pinned else others.take(10), if (hero.isEmpty()) firstFocus else null, ::togglePin)
             val rest = if (pinned.isNotEmpty()) others else others.drop(10)
             rest.chunked(6).forEach { AppRow(app, it, null, ::togglePin) }
@@ -288,7 +290,7 @@ private fun HeroCard(app: GlassApp, tvApp: TvApp, modifier: Modifier, focus: Foc
     GlassButton(
         onClick = { app.appRepo.launch(tvApp) },
         modifier = modifier.aspectRatio(16f / 9f).then(if (focus != null) Modifier.focusRequester(focus) else Modifier),
-        shape = RoundedCornerShape(28.dp),
+        shape = RoundedCornerShape(34.dp),
         focusScale = 1.05f,
     ) {
         val a = art
@@ -327,9 +329,9 @@ private fun AssistantCard(app: GlassApp, ui: LauncherUi, modifier: Modifier) {
         focusScale = 1.05f,
     ) {
         Column(Modifier.fillMaxSize().padding(22.dp), verticalArrangement = Arrangement.SpaceBetween) {
-            Box(Modifier.size(52.dp).background(Brush.radialGradient(listOf(Color.White, c.pink, c.rose, c.cocoa)), CircleShape))
+            dev.glasstv.launcher.ui.components.CuteOrb(64.dp)
             Column {
-                GlassText("Ask Glass", GlassType.title)
+                GlassText("Ask Glass ✨", GlassType.title)
                 GlassText("Recommendations, recaps, or just say “open Netflix”", GlassType.label, color = c.textSoft, maxLines = 3)
             }
         }
@@ -339,7 +341,13 @@ private fun AssistantCard(app: GlassApp, ui: LauncherUi, modifier: Modifier) {
 @Composable
 private fun TopBar(settings: Settings, now: LocalDateTime, ui: LauncherUi) {
     val c = LocalGlass.current
-    val greeting = when (now.hour) { in 5..11 -> "Good morning"; in 12..16 -> "Good afternoon"; in 17..21 -> "Good evening"; else -> "Good night" }
+    val greeting = when (now.hour) { in 5..11 -> "Good morning"; in 12..16 -> "Hi there"; in 17..21 -> "Cozy evening"; else -> "Sweet dreams soon" }
+    val mood = when (now.hour) {
+        in 5..11 -> "Coffee and cartoons? ☕"
+        in 12..16 -> "A little treat of a show? ♡"
+        in 17..21 -> "Blanket-and-movie weather ♡"
+        else -> "One more episode, then bed ☾"
+    }
     val weather = rememberWeather(settings)
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
@@ -349,6 +357,7 @@ private fun TopBar(settings: Settings, now: LocalDateTime, ui: LauncherUi) {
             )
             GlassText(
                 listOfNotNull(
+                    mood,
                     now.format(DateTimeFormatter.ofPattern("h:mm")),
                     now.format(DateTimeFormatter.ofPattern("EEEE, MMMM d")),
                     weather?.let { "${it.glyph} ${it.temp}°" },
@@ -428,17 +437,17 @@ private fun AppTile(app: GlassApp, tvApp: TvApp, modifier: Modifier, onLongClick
             modifier = Modifier.fillMaxWidth().aspectRatio(16f / 10f)
                 .then(if (focus != null) Modifier.focusRequester(focus) else Modifier)
                 .onFocusChanged { focused = it.isFocused },
-            shape = RoundedCornerShape(26.dp),
+            shape = RoundedCornerShape(32.dp),
             focusScale = 1.10f,
         ) {
             val a = art
             when {
                 a != null && a.isBanner -> Image(
-                    a.image, tvApp.label, Modifier.fillMaxSize().clip(RoundedCornerShape(26.dp)), contentScale = ContentScale.Crop,
+                    a.image, tvApp.label, Modifier.fillMaxSize().clip(RoundedCornerShape(32.dp)), contentScale = ContentScale.Crop,
                 )
                 else -> Box(
                     Modifier.fillMaxSize().background(
-                        Brush.linearGradient(listOf(c.glassFillFocused, c.pink.copy(alpha = 0.35f))), RoundedCornerShape(26.dp),
+                        Brush.linearGradient(listOf(c.glassFillFocused, c.pink.copy(alpha = 0.35f))), RoundedCornerShape(32.dp),
                     ),
                     contentAlignment = Alignment.Center,
                 ) {

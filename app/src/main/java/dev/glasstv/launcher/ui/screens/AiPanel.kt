@@ -84,7 +84,7 @@ fun AiPanel(app: GlassApp, onClose: () -> Unit) {
             .focusGroup(),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(36.dp).background(Brush.radialGradient(listOf(Color.White, c.pink, c.rose, c.cocoa)), CircleShape))
+            dev.glasstv.launcher.ui.components.CuteOrb(44.dp)
             Spacer(Modifier.width(14.dp))
             GlassText("Assistant", GlassType.greeting, Modifier.weight(1f))
             if (state.messages.isNotEmpty()) PillButton("Clear", { app.assistant.clear() })

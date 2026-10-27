@@ -26,6 +26,15 @@ import kotlin.math.sin
 
 private class Orb(val x: Float, val y: Float, val r: Float, val dx: Float, val dy: Float, val speed: Int, val phase: Float)
 
+private class Sparkle(val x: Float, val y: Float, val size: Float, val speed: Int, val phase: Float)
+
+private val sparkles = listOf(
+    Sparkle(0.08f, 0.40f, 0.0045f, 7, 0.0f), Sparkle(0.93f, 0.12f, 0.0055f, 5, 0.3f),
+    Sparkle(0.47f, 0.07f, 0.0035f, 9, 0.6f), Sparkle(0.97f, 0.62f, 0.0040f, 6, 0.15f),
+    Sparkle(0.04f, 0.88f, 0.0050f, 8, 0.8f), Sparkle(0.62f, 0.95f, 0.0035f, 7, 0.45f),
+    Sparkle(0.80f, 0.40f, 0.0030f, 10, 0.7f),
+)
+
 private val orbs = listOf(
     Orb(0.18f, 0.22f, 0.42f, 0.10f, 0.08f, 1, 0.00f), // pink
     Orb(0.82f, 0.30f, 0.38f, 0.08f, 0.10f, 1, 0.33f), // lilac
@@ -79,6 +88,16 @@ fun OrbBackground(reduceMotion: Boolean, extraBlur: Boolean, modifier: Modifier 
                 ),
                 radius = radius, center = center,
             )
+        }
+        // Tiny twinkling sparkles: soft four-point stars, each pulsing on its own phase.
+        sparkles.forEach { s ->
+            val tw = if (reduceMotion) 0.7f else 0.35f + 0.65f * (0.5f + 0.5f * sin(2f * PI.toFloat() * (time * s.speed + s.phase)))
+            val p = Offset(s.x * size.width, s.y * size.height)
+            val len = s.size * dim * 1.9f
+            val col = (if (c.isDark) Color.White else c.rose).copy(alpha = (if (c.isDark) 0.75f else 0.8f) * tw)
+            drawLine(col, Offset(p.x - len, p.y), Offset(p.x + len, p.y), strokeWidth = len * 0.28f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+            drawLine(col, Offset(p.x, p.y - len), Offset(p.x, p.y + len), strokeWidth = len * 0.28f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+            drawCircle(c.pink.copy(alpha = 0.5f * tw), len * 0.9f, p)
         }
     }
 }

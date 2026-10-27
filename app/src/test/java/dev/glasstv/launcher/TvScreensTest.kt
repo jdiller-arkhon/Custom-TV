@@ -101,7 +101,9 @@ class TvScreensTest {
             spm.addIntentFilterForActivity(comp, IntentFilter(Intent.ACTION_MAIN).apply { addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER) })
             val act = ActivityInfo().apply { packageName = pkg; name = comp.className; applicationInfo = ai; nonLocalizedLabel = label; exported = true; enabled = true }
             spm.addOrUpdateActivity(act)
-            val icon = BitmapDrawable(ctx.resources, placeholderIcon(label, color))
+            val real = System.getProperty("tvscreens.icons")?.let { java.io.File(it, "$pkg.png") }?.takeIf { it.exists() }
+                ?.let { android.graphics.BitmapFactory.decodeFile(it.path) }
+            val icon = BitmapDrawable(ctx.resources, real ?: placeholderIcon(label, color))
             spm.setApplicationIcon(pkg, icon)
             spm.addActivityIcon(comp, icon)
         }

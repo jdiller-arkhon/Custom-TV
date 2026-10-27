@@ -43,6 +43,8 @@ android {
                 it.systemProperty("robolectric.offline", "true")
                 it.systemProperty("robolectric.dependency.dir", dir.toString())
             }
+            // Optional local folder of <package>.png icons for realistic previews (never committed).
+            project.findProperty("previewIcons")?.let { dir -> it.systemProperty("tvscreens.icons", dir.toString()) }
             if (!project.hasProperty("tvScreens")) it.exclude("**/TvScreensTest*")
         }
     }
