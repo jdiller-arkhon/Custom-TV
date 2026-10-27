@@ -52,68 +52,19 @@ private val orbs = listOf(
  */
 @Composable
 fun OrbBackground(reduceMotion: Boolean, extraBlur: Boolean, modifier: Modifier = Modifier, accent: Color? = null) {
+    // "Paper" background for the editorial design: flat stock with a faint warm vignette that
+    // picks up the focused app's colour. Static (no per-frame work) — the motion lives in the page.
     val c = LocalGlass.current
-    // Mood lighting: the two big orbs lean toward the focused app's colour.
-    val target = accent?.let { androidx.compose.ui.graphics.lerp(c.pink, it, 0.55f) } ?: c.pink
-    val lead by androidx.compose.animation.animateColorAsState(target, androidx.compose.animation.core.tween(900), label = "accent")
-    val second by androidx.compose.animation.animateColorAsState(accent?.let { androidx.compose.ui.graphics.lerp(c.lilac, it, 0.35f) } ?: c.lilac, androidx.compose.animation.core.tween(1200), label = "accent2")
-    val colors = listOf(lead, second, c.latte, c.rose)
-    val t: State<Float> = if (reduceMotion) {
-        remember { mutableFloatStateOfConst(0.12f) }
-    } else {
-        rememberInfiniteTransition(label = "orbs").animateFloat(
-            initialValue = 0f, targetValue = 1f,
-            animationSpec = infiniteRepeatable(tween(90_000, easing = LinearEasing), RepeatMode.Restart),
-            label = "orbT",
-        )
-    }
-    val blur = extraBlur && Build.VERSION.SDK_INT >= 31
-    Canvas(
-        modifier.fillMaxSize().then(
-            if (blur) Modifier.graphicsLayer { renderEffect = BlurEffect(60f, 60f, TileMode.Decal) } else Modifier
-        )
-    ) {
+    val tint by androidx.compose.animation.animateColorAsState(
+        (accent ?: c.rose).copy(alpha = if (c.isDark) 0.16f else 0.07f), tween(900), label = "paperTint",
+    )
+    Canvas(modifier.fillMaxSize()) {
         drawRect(c.background)
-        val time = t.value
-        val dim = maxOf(size.width, size.height)
-        orbs.forEachIndexed { i, o ->
-            val a = 2f * PI.toFloat() * (time * o.speed + o.phase)
-            val center = Offset(
-                (o.x + o.dx * sin(a)) * size.width,
-                (o.y + o.dy * cos(a * 0.8f)) * size.height,
+        drawRect(
+            Brush.radialGradient(
+                listOf(Color.Transparent, tint),
+                center = Offset(size.width * 0.3f, size.height * 0.45f), radius = maxOf(size.width, size.height) * 0.85f,
             )
-            val radius = o.r * dim
-            val color = colors[i]
-            drawCircle(
-                brush = Brush.radialGradient(
-                    0f to color.copy(alpha = c.orbAlpha),
-                    0.45f to color.copy(alpha = c.orbAlpha * 0.45f),
-                    1f to Color.Transparent,
-                    center = center, radius = radius,
-                ),
-                radius = radius, center = center,
-            )
-        }
-        // Floating hearts drifting upward, each on its own lane and pace.
-        for (i in 0 until 9) {
-            val lane = (i * 0.113f + 0.05f) % 1f
-            val prog = if (reduceMotion) (i / 9f) else ((time * (2 + i % 3) + i * 0.137f) % 1f)
-            val hx = lane * size.width + sin((prog * 6f + i).toDouble()).toFloat() * dim * 0.012f
-            val hy = size.height * (1.05f - prog * 1.15f)
-            val ha = (sin(prog * PI.toFloat())).coerceAtLeast(0f) * (if (c.isDark) 0.35f else 0.45f)
-            drawHeart(Offset(hx, hy), dim * (0.010f + (i % 3) * 0.004f), c.rose.copy(alpha = ha))
-        }
-        // Tiny twinkling sparkles: soft four-point stars, each pulsing on its own phase.
-        sparkles.forEach { s ->
-            val tw = if (reduceMotion) 0.7f else 0.35f + 0.65f * (0.5f + 0.5f * sin(2f * PI.toFloat() * (time * s.speed + s.phase)))
-            val p = Offset(s.x * size.width, s.y * size.height)
-            val len = s.size * dim * 1.9f
-            val col = (if (c.isDark) Color.White else c.rose).copy(alpha = (if (c.isDark) 0.75f else 0.8f) * tw)
-            drawLine(col, Offset(p.x - len, p.y), Offset(p.x + len, p.y), strokeWidth = len * 0.28f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
-            drawLine(col, Offset(p.x, p.y - len), Offset(p.x, p.y + len), strokeWidth = len * 0.28f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
-            drawCircle(c.pink.copy(alpha = 0.5f * tw), len * 0.9f, p)
-        }
+        )
     }
 }
-
-private fun mutableFloatStateOfConst(v: Float): State<Float> = object : State<Float> { override val value = v }

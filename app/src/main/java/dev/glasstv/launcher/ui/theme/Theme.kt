@@ -37,42 +37,42 @@ data class GlassColors(
 
 val LightColors = GlassColors(
     isDark = false,
-    background = Color(0xFFFBE8EE),
-    pink = Color(0xFFF7C6D9),
-    rose = Color(0xFFE58FB0),
-    lilac = Color(0xFFD9C8F5),
-    peach = Color(0xFFFFD3C4),
-    cocoa = Color(0xFF4A2C24),
-    latte = Color(0xFFDDB8A4),
-    gold = Color(0xFFC9A36A),
-    text = Color(0xFF3E2420),
-    textSoft = Color(0xFF3E2420).copy(alpha = 0.66f),
-    glassFill = Color(0xFFFFF4F6),        // solid cream-blush card
+    background = Color(0xFFF6EFE9),       // ivory paper
+    pink = Color(0xFFF2D4D7),             // blush
+    rose = Color(0xFFB0304A),             // rouge
+    lilac = Color(0xFFE7DCE4),
+    peach = Color(0xFFF1DED2),
+    cocoa = Color(0xFF3A2226),
+    latte = Color(0xFFD9C3B4),
+    gold = Color(0xFFB08A50),             // champagne
+    text = Color(0xFF1C1416),             // ink
+    textSoft = Color(0xFF1C1416).copy(alpha = 0.58f),
+    glassFill = Color(0xFFFFFBF8),        // paper card
     glassFillFocused = Color(0xFFFFFFFF),
-    highlightTop = Color(0xFFF3D3DE),     // soft flat outline, no gloss
-    highlightBottom = Color(0xFFF3D3DE),
-    shadow = Color(0xFFE58FB0).copy(alpha = 0.35f),
-    orbAlpha = 0.85f,
+    highlightTop = Color(0xFFE4D6CB),     // printed hairline
+    highlightBottom = Color(0xFFE4D6CB),
+    shadow = Color(0xFFB0304A).copy(alpha = 0.16f),
+    orbAlpha = 0f,
 )
 
 val DarkColors = GlassColors(
     isDark = true,
-    background = Color(0xFF22141A),
-    pink = Color(0xFFF07BAA),
-    rose = Color(0xFFFF8FC0),
-    lilac = Color(0xFFA98BEA),
-    peach = Color(0xFFF2A58E),
-    cocoa = Color(0xFF5C3A2E),
-    latte = Color(0xFF8A5A44),
-    gold = Color(0xFFE2C58F),
-    text = Color(0xFFFCEAF1),
-    textSoft = Color(0xFFFCEAF1).copy(alpha = 0.66f),
-    glassFill = Color(0xFF34222A),        // solid cocoa-plum card
-    glassFillFocused = Color(0xFF45303A),
-    highlightTop = Color(0xFF4E3641),
-    highlightBottom = Color(0xFF4E3641),
-    shadow = Color(0xFFFF8FC0).copy(alpha = 0.30f),
-    orbAlpha = 0.55f,
+    background = Color(0xFF141012),       // velvet noir
+    pink = Color(0xFF4A2630),
+    rose = Color(0xFFE0607A),
+    lilac = Color(0xFF2A2026),
+    peach = Color(0xFF2E2220),
+    cocoa = Color(0xFF6B3A44),
+    latte = Color(0xFF5A4438),
+    gold = Color(0xFFD9BB86),
+    text = Color(0xFFF3E9E2),
+    textSoft = Color(0xFFF3E9E2).copy(alpha = 0.6f),
+    glassFill = Color(0xFF1E181A),
+    glassFillFocused = Color(0xFF2A2124),
+    highlightTop = Color(0xFF3A2E31),
+    highlightBottom = Color(0xFF3A2E31),
+    shadow = Color(0xFFE0607A).copy(alpha = 0.18f),
+    orbAlpha = 0f,
 )
 
 val Fraunces = FontFamily(
@@ -99,6 +99,12 @@ object GlassType {
     val body = TextStyle(fontFamily = Figtree, fontWeight = FontWeight.Normal, fontSize = 20.sp, lineHeight = 28.sp)
     val label = TextStyle(fontFamily = Figtree, fontWeight = FontWeight.Medium, fontSize = 17.sp)
     val small = TextStyle(fontFamily = Figtree, fontWeight = FontWeight.Normal, fontSize = 15.sp)
+    // Editorial
+    val masthead = TextStyle(fontFamily = Fraunces, fontWeight = FontWeight.Light, fontSize = 118.sp, letterSpacing = 14.sp, lineHeight = 112.sp)
+    val kicker = TextStyle(fontFamily = Figtree, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, letterSpacing = 4.sp)
+    val coverTitle = TextStyle(fontFamily = Fraunces, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic, fontWeight = FontWeight.Normal, fontSize = 64.sp, lineHeight = 64.sp)
+    val contents = TextStyle(fontFamily = Fraunces, fontWeight = FontWeight.Normal, fontSize = 27.sp)
+    val folio = TextStyle(fontFamily = Figtree, fontWeight = FontWeight.Medium, fontSize = 14.sp, letterSpacing = 2.sp)
 }
 
 val LocalGlass = staticCompositionLocalOf { LightColors }
