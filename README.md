@@ -37,6 +37,7 @@ Regenerate: `./gradlew :app:testDebugUnitTest -PtvScreens --tests '*TvScreensTes
 | | |
 |---|---|
 | **Home** | Cozy, pink, clean SaaS (Apple × Vercel × Perplexity): a quiet top bar (anna · with Grace, time, Ambient / Phone remote / Settings); a centred “Good evening, Anna ♡” hero with one big **Ask Grace** box and three suggestion chips; one calm row of app cards with real icons; Justin's note at the foot. Blush-white with a faint dot grid and a soft pink glow (dark: deep plum). |
+| **Date Night 💕** | One press picks a random movie or show for Justin & Anna: 30% Justin's taste (action, comedy), 30% Anna's (romance, girly), 40% meet-in-the-middle (action rom-coms, rom-coms). Slot-machine spin, no recent repeats, works offline; *Ask Grace* for details and where to stream. Also on the phone remote. |
 | **Animations** | Gentle fade-up on each return home, Grace blinks, springy pink-ring focus on cards. All off with *Reduce motion*. |
 | **Apps** | All leanback apps, then phone-only launcher apps. Live updates on install/uninstall. Default favorites are whichever of Netflix, YouTube, Disney+, Max, Prime Video, Spotify, Plex and Twitch are installed. **Long-press OK** on a tile to pin or unpin it. Reorder in Settings. |
 | **Focus** | Focused tile scales 1.08× with a solid rose ring and a pink glow. |

@@ -84,6 +84,10 @@ class TvScreensTest {
         org.robolectric.shadows.ShadowLooper.idleMainLooper()
         compose.onRoot().captureRoboImage("$out/tv-welcome-light.png")
         compose.mainClock.autoAdvance = true
+        compose.runOnUiThread { compose.activity.ui.dateNight = true }
+        compose.mainClock.advanceTimeBy(4000)
+        shot("tv-date-night-light")
+        compose.runOnUiThread { compose.activity.ui.dateNight = false }
         compose.runOnUiThread { compose.activity.ui.aiOpen = true }
         shot("tv-assistant-light")
         compose.runOnUiThread { compose.activity.ui.aiOpen = false; compose.activity.ui.settingsOpen = true }

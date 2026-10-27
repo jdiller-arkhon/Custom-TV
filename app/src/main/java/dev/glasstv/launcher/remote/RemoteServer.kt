@@ -160,7 +160,7 @@ class RemoteServer(
                 }
                 "backspace" -> RemoteBus.send(RemoteCommand.Backspace)
                 "launch" -> msg.optString("pkg").takeIf { it.isNotBlank() }?.let { RemoteBus.send(RemoteCommand.Launch(it)) }
-                "action" -> runCatching { QuickAction.valueOf(msg.optString("a").uppercase()) }.getOrNull()
+                "action" -> runCatching { QuickAction.valueOf(msg.optString("a").uppercase().replace("DATENIGHT", "DATE_NIGHT")) }.getOrNull()
                     ?.let { RemoteBus.send(RemoteCommand.Action(it)) }
                 "apps" -> scope.launch { runCatching { reply(JSONObject().put("t", "apps").put("apps", shortcuts())) } }
                 "vol" -> RemoteBus.send(RemoteCommand.Volume(when (msg.optString("d")) { "up" -> 1; "down" -> -1; else -> 0 }))

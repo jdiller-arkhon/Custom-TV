@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
 /** Launcher shortcuts the phone can trigger from anywhere. */
-enum class QuickAction { ASSISTANT, AMBIENT, SETTINGS, HOME }
+enum class QuickAction { ASSISTANT, AMBIENT, SETTINGS, HOME, DATE_NIGHT }
 
 enum class RemoteKey { UP, DOWN, LEFT, RIGHT, OK, BACK, HOME, PLAY_PAUSE, REWIND, FAST_FORWARD }
 

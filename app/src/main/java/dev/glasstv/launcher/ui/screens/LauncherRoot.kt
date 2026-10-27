@@ -136,7 +136,7 @@ fun LauncherRoot(app: GlassApp, ui: LauncherUi) {
         Box(Modifier.fillMaxSize()) {
             OrbBackground(settings.reduceMotion, settings.extraBlur, accent = accent)
 
-            val anyOverlay = ui.aiOpen || ui.settingsOpen || ui.qrOpen
+            val anyOverlay = ui.aiOpen || ui.settingsOpen || ui.qrOpen || ui.dateNight
             HomeScreen(
                 app, ui, settings, now, Modifier.fillMaxSize(), interactive = !anyOverlay && !ui.ambient,
                 onAccent = { a -> scope.launch { accent = app.appRepo.art(a)?.tint?.takeIf { it != 0 }?.let { Color(it) } } },
@@ -164,6 +164,14 @@ fun LauncherRoot(app: GlassApp, ui: LauncherUi) {
                     ui.qrOpen = false
                     if (!settings.onboarded) app.scope.launch { app.settingsRepo.setOnboarded() }
                 })
+            }
+
+            if (ui.dateNight && !ui.ambient) {
+                DateNightSheet(
+                    app, settings.reduceMotion,
+                    onAskGrace = { prompt -> ui.dateNight = false; ui.aiOpen = true; app.assistant.send(prompt) },
+                    onClose = { ui.dateNight = false },
+                )
             }
 
             PairingCodeToast(Modifier.align(Alignment.TopCenter).padding(top = 32.dp))
@@ -282,11 +290,12 @@ private fun HomeScreen(
         }
         Spacer(Modifier.height(14.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.rise(0.24f)) {
+            Chip("💕  Date Night", highlight = true) { ui.dateNight = true }
             listOf(
                 "🍿  Movie night" to "What should we watch tonight? Suggest 4 options across moods.",
                 "☺  Something cozy" to "Recommend 4 cozy, feel-good shows or films.",
                 "✨  Surprise me" to "Surprise me with one great pick and why I'd love it.",
-            ).forEach { (label, prompt) -> Chip(label) { ui.aiOpen = true; app.assistant.send(prompt) } }
+            ).take(2).forEach { (label, prompt) -> Chip(label) { ui.aiOpen = true; app.assistant.send(prompt) } }
         }
 
         Spacer(Modifier.weight(0.45f))
@@ -381,18 +390,18 @@ private fun NavLink(text: String, onClick: () -> Unit) {
 }
 
 @Composable
-private fun Chip(text: String, onClick: () -> Unit) {
+private fun Chip(text: String, highlight: Boolean = false, onClick: () -> Unit) {
     val c = LocalGlass.current
     androidx.tv.material3.Surface(
         onClick = onClick,
         shape = androidx.tv.material3.ClickableSurfaceDefaults.shape(RoundedCornerShape(50)),
         colors = androidx.tv.material3.ClickableSurfaceDefaults.colors(
-            containerColor = c.glassFill, focusedContainerColor = c.pink, pressedContainerColor = c.pink,
-            contentColor = c.text, focusedContentColor = c.cocoa,
+            containerColor = if (highlight) c.rose else c.glassFill, focusedContainerColor = if (highlight) c.rose else c.pink, pressedContainerColor = c.pink,
+            contentColor = if (highlight) Color.White else c.text, focusedContentColor = if (highlight) Color.White else c.cocoa,
         ),
         border = androidx.tv.material3.ClickableSurfaceDefaults.border(
-            border = androidx.tv.material3.Border(androidx.compose.foundation.BorderStroke(1.dp, c.highlightTop), shape = RoundedCornerShape(50)),
-            focusedBorder = androidx.tv.material3.Border(androidx.compose.foundation.BorderStroke(2.dp, c.rose), shape = RoundedCornerShape(50)),
+            border = androidx.tv.material3.Border(androidx.compose.foundation.BorderStroke(1.dp, if (highlight) c.rose else c.highlightTop), shape = RoundedCornerShape(50)),
+            focusedBorder = androidx.tv.material3.Border(androidx.compose.foundation.BorderStroke(3.dp, if (highlight) c.cocoa.copy(alpha = 0.35f) else c.rose), shape = RoundedCornerShape(50)),
         ),
         scale = androidx.tv.material3.ClickableSurfaceDefaults.scale(focusedScale = 1.05f),
         glow = androidx.tv.material3.ClickableSurfaceDefaults.glow(androidx.tv.material3.Glow.None, androidx.tv.material3.Glow(c.shadow, 10.dp)),

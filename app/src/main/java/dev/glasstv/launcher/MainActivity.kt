@@ -24,11 +24,12 @@ class LauncherUi {
     var settingsOpen by mutableStateOf(false)
     var qrOpen by mutableStateOf(false)
     var ambient by mutableStateOf(false)
+    var dateNight by mutableStateOf(false)
     /** Bumped when HOME is pressed while already home, so the grid can scroll back to the top. */
     var homeTick by mutableIntStateOf(0)
 
     fun goHome() {
-        aiOpen = false; settingsOpen = false; qrOpen = false; ambient = false
+        aiOpen = false; settingsOpen = false; qrOpen = false; ambient = false; dateNight = false
         homeTick++
     }
 }
@@ -101,6 +102,7 @@ class MainActivity : ComponentActivity() {
             QuickAction.ASSISTANT -> { ui.goHome(); ui.aiOpen = true }
             QuickAction.AMBIENT -> { ui.goHome(); ui.ambient = true }
             QuickAction.SETTINGS -> { ui.goHome(); ui.settingsOpen = true }
+            QuickAction.DATE_NIGHT -> { ui.goHome(); ui.dateNight = true }
         }
     }
 
