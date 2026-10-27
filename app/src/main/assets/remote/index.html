@@ -4,23 +4,23 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#FBE8EE" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#1E1411" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#22141A" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Glass TV Remote</title>
 <style>
 :root{
-  --bg:#FBE8EE;--pink:#F7C6D9;--rose:#E58FB0;--lilac:#D9C8F5;--peach:#FFD3C4;--cocoa:#4A2C24;--latte:#C9A08A;
+  --bg:#FBE8EE;--pink:#F7C6D9;--rose:#E58FB0;--lilac:#D9C8F5;--peach:#FFD3C4;--cocoa:#5A3329;--latte:#DDB8A4;
   --text:#3E2420;--soft:rgba(62,36,32,.62);--faint:rgba(62,36,32,.35);
   --glass:rgba(255,255,255,.42);--glass-2:rgba(255,255,255,.62);--hi:rgba(255,255,255,.9);--lo:rgba(255,255,255,.25);
-  --shadow:rgba(176,112,122,.30);--glow:rgba(229,143,176,.55);--orb:.8;
+  --shadow:rgba(229,143,176,.30);--glow:rgba(229,143,176,.55);--orb:.8;
   --serif:"Fraunces","Iowan Old Style","Palatino Linotype",Georgia,serif;
   --sans:"Figtree",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
 }
 @media (prefers-color-scheme:dark){:root{
-  --bg:#1E1411;--pink:#F07BAA;--rose:#FF8FC0;--lilac:#A98BEA;--peach:#F2A58E;--cocoa:#5C3A2E;--latte:#8A5A44;
+  --bg:#22141A;--pink:#F07BAA;--rose:#FF8FC0;--lilac:#A98BEA;--peach:#F2A58E;--cocoa:#5C3A2E;--latte:#8A5A44;
   --text:#FCEAF1;--soft:rgba(252,234,241,.62);--faint:rgba(252,234,241,.3);
-  --glass:rgba(255,255,255,.09);--glass-2:rgba(255,255,255,.16);--hi:rgba(255,255,255,.28);--lo:rgba(255,255,255,.05);
+  --glass:rgba(255,190,215,.10);--glass-2:rgba(255,190,215,.18);--hi:rgba(255,255,255,.28);--lo:rgba(255,255,255,.05);
   --shadow:rgba(255,143,192,.18);--glow:rgba(255,143,192,.5);--orb:.5}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:16px/1.4 var(--sans);overflow:hidden;touch-action:manipulation;-webkit-font-smoothing:antialiased}
@@ -92,7 +92,7 @@ button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:poin
 .tile{display:flex;flex-direction:column;align-items:center;gap:7px;padding:12px 4px 10px;border-radius:22px;min-width:0;transition:transform .12s cubic-bezier(.3,1.6,.6,1),box-shadow .2s}
 .tile img,.tile .ph{width:52px;height:52px;border-radius:15px;object-fit:cover;box-shadow:0 6px 16px var(--shadow)}
 .tile .ph{display:grid;place-items:center;font:600 22px/1 var(--serif);background:linear-gradient(135deg,var(--rose),var(--cocoa));color:#fff}
-.pink .tile img{filter:url(#pinkify)}
+.pink .tile img{filter:url(#pinkify)}.pink .tile img.dark{filter:url(#pinkify-dark)}
 .tile img{transition:filter .3s}
 .h2row{display:flex;align-items:center;justify-content:space-between;margin-right:4px}
 .switch{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--soft);padding:6px 10px 6px 12px;border-radius:999px}
@@ -154,9 +154,22 @@ nav button.sel svg{stroke:var(--rose)}
       <feFuncB type="linear" slope="1.25" intercept="-0.06"/>
     </feComponentTransfer>
     <feComponentTransfer>
-      <feFuncR type="table" tableValues="0.29 0.72 0.94 1.00"/>
-      <feFuncG type="table" tableValues="0.17 0.38 0.72 0.95"/>
-      <feFuncB type="table" tableValues="0.14 0.42 0.80 0.97"/>
+      <feFuncR type="table" tableValues="0.48 0.82 0.96 1.00"/>
+      <feFuncG type="table" tableValues="0.24 0.48 0.76 0.96"/>
+      <feFuncB type="table" tableValues="0.31 0.58 0.85 0.98"/>
+    </feComponentTransfer>
+  </filter>
+  <filter id="pinkify-dark" color-interpolation-filters="sRGB">
+    <feColorMatrix type="matrix" values=".2126 .7152 .0722 0 0  .2126 .7152 .0722 0 0  .2126 .7152 .0722 0 0  0 0 0 1 0"/>
+    <feComponentTransfer>
+      <feFuncR type="linear" slope="1.6" intercept="-0.08"/>
+      <feFuncG type="linear" slope="1.6" intercept="-0.08"/>
+      <feFuncB type="linear" slope="1.6" intercept="-0.08"/>
+    </feComponentTransfer>
+    <feComponentTransfer>
+      <feFuncR type="table" tableValues="0.80 0.93 1.00"/>
+      <feFuncG type="table" tableValues="0.47 0.72 1.00"/>
+      <feFuncB type="table" tableValues="0.60 0.82 1.00"/>
     </feComponentTransfer>
   </filter>
 </svg>
@@ -307,11 +320,22 @@ nav button.sel svg{stroke:var(--rose)}
   // Shortcuts grid (icons come from the TV)
   function tile(a) {
     const b = document.createElement('button'); b.className = 'tile glass';
-    if (a.icon) { const i = new Image(); i.src = a.icon; i.alt = ''; b.append(i); }
+    if (a.icon) { const i = new Image(); i.onload = () => { if (isDark(i)) i.classList.add('dark'); }; i.src = a.icon; i.alt = ''; b.append(i); }
     else { const p = document.createElement('span'); p.className = 'ph'; p.textContent = (a.label || '?')[0]; b.append(p); }
     const l = document.createElement('b'); l.textContent = a.label; b.append(l);
     press(b, () => { if (send({ t: 'launch', pkg: a.pkg })) toast(`Opening ${a.label}`); });
     return b;
+  }
+  // Mean luminance of the icon's opaque pixels; dark icons (e.g. Disney+ navy with a thin white wordmark)
+  // get a lighter treatment so the logo stays white and readable.
+  function isDark(img) {
+    try {
+      const c = document.createElement('canvas'); c.width = c.height = 24;
+      const g = c.getContext('2d'); g.drawImage(img, 0, 0, 24, 24);
+      const d = g.getImageData(0, 0, 24, 24).data; let sum = 0, n = 0;
+      for (let k = 0; k < d.length; k += 4) if (d[k + 3] > 128) { sum += .2126 * d[k] + .7152 * d[k + 1] + .0722 * d[k + 2]; n++; }
+      return n > 0 && sum / n < 85;
+    } catch (e) { return false; }
   }
   function renderApps(apps) {
     const fav = apps.filter(a => a.pinned), more = apps.filter(a => !a.pinned);
