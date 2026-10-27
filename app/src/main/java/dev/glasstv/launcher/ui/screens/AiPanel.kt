@@ -86,7 +86,7 @@ fun AiPanel(app: GlassApp, onClose: () -> Unit) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             dev.glasstv.launcher.ui.components.CuteOrb(44.dp)
             Spacer(Modifier.width(14.dp))
-            GlassText("Assistant", GlassType.greeting, Modifier.weight(1f))
+            GlassText(dev.glasstv.launcher.Personal.ASSISTANT, GlassType.greeting, Modifier.weight(1f))
             if (state.messages.isNotEmpty()) PillButton("Clear", { app.assistant.clear() })
         }
         Spacer(Modifier.height(16.dp))
@@ -95,7 +95,7 @@ fun AiPanel(app: GlassApp, onClose: () -> Unit) {
             if (state.messages.isEmpty() && state.error == null) {
                 item {
                     GlassText(
-                        "Ask for something to watch, a recap, or say \"open Netflix\". Type from your paired phone or with the TV keyboard.",
+                        "Hi Anna, I'm Grace ♡ Ask me what to watch, for a recap, or say \"open Netflix\". Type from your paired phone or with the TV keyboard.",
                         GlassType.body, color = c.textSoft,
                     )
                 }

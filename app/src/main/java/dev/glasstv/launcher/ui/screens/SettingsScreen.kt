@@ -89,13 +89,6 @@ fun SettingsScreen(app: GlassApp, s: Settings, onClose: () -> Unit, onShowQr: ()
                 }
             }
 
-            section("PROFILE")
-            item {
-                Labeled("Greeting name") {
-                    GlassTextField(s.greetingName, { scope.launch { repo.setName(it) } }, "Optional, e.g. Jess")
-                }
-            }
-
             section("APPEARANCE")
             item {
                 Labeled("Theme") {
@@ -122,7 +115,7 @@ fun SettingsScreen(app: GlassApp, s: Settings, onClose: () -> Unit, onShowQr: ()
             section("WEATHER")
             item { WeatherRow(app, s) }
 
-            section("ASSISTANT")
+            section("GRACE (ASSISTANT)")
             item { AssistantRows(app, s) }
 
             section("HOME BUTTON")

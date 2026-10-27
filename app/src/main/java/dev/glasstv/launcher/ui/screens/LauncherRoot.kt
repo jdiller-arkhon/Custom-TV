@@ -248,7 +248,7 @@ private fun HomeScreen(
 
         if (query.isNotBlank()) {
             if (results.isEmpty()) GlassText(
-                "No apps match \"${query.trim()}\". Press OK in the search bar to ask the assistant.",
+                "No apps match \"${query.trim()}\". Press OK in the search bar to ask Grace.",
                 GlassType.body, Modifier.padding(12.dp), color = LocalGlass.current.textSoft,
             ) else AppRow(app, results, null, ::togglePin)
         } else {
@@ -331,7 +331,7 @@ private fun AssistantCard(app: GlassApp, ui: LauncherUi, modifier: Modifier) {
         Column(Modifier.fillMaxSize().padding(22.dp), verticalArrangement = Arrangement.SpaceBetween) {
             dev.glasstv.launcher.ui.components.CuteOrb(64.dp)
             Column {
-                GlassText("Ask Glass ✨", GlassType.title)
+                GlassText("Ask ${dev.glasstv.launcher.Personal.ASSISTANT} ✨", GlassType.title)
                 GlassText("Recommendations, recaps, or just say “open Netflix”", GlassType.label, color = c.textSoft, maxLines = 3)
             }
         }
@@ -352,7 +352,7 @@ private fun TopBar(settings: Settings, now: LocalDateTime, ui: LauncherUi) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
             GlassText(
-                if (settings.greetingName.isBlank()) greeting else "$greeting, ${settings.greetingName}",
+                "$greeting, ${settings.greetingName}",
                 GlassType.greeting, maxLines = 1,
             )
             GlassText(
@@ -374,12 +374,12 @@ private fun TopBar(settings: Settings, now: LocalDateTime, ui: LauncherUi) {
                 }
             }
             CircleIcon("⚙") { ui.settingsOpen = true }
-            // Profile: the greeting name's initial, opens Settings (where the name lives).
+            // Profile: Anna's initial; opens Settings.
             GlassButton(onClick = { ui.settingsOpen = true }, shape = CircleShape, modifier = Modifier.size(52.dp)) {
                 Box(
                     Modifier.size(52.dp).background(Brush.linearGradient(listOf(c.rose, c.cocoa)), CircleShape),
                     contentAlignment = Alignment.Center,
-                ) { GlassText(settings.greetingName.take(1).uppercase().ifEmpty { "☺" }, GlassType.title, color = Color.White) }
+                ) { GlassText(settings.greetingName.take(1).uppercase(), GlassType.title, color = Color.White) }
             }
         }
     }

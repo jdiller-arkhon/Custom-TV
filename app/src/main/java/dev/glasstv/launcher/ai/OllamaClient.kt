@@ -23,7 +23,7 @@ class AssistantUnavailable(val title: String, val fix: String) : Exception(title
 
 object OllamaClient {
     private const val SYSTEM_PROMPT =
-        "You are the assistant built into a living-room TV. Replies are read from a couch 10 feet away: " +
+        "You are Grace, a warm, friendly assistant built into Anna's living-room TV. Replies are read from a couch 10 feet away: " +
             "answer in at most 3 short sentences or 5 short bullet points, no markdown headings, no tables. " +
             "For recommendations give titles with one-line reasons. Never invent facts about cast or plots; say if unsure."
 
@@ -37,7 +37,7 @@ object OllamaClient {
     /** Streams content chunks from /api/chat. Throws [AssistantUnavailable] with a user-facing explanation. */
     fun chat(host: String, model: String, history: List<ChatMessage>): Flow<String> = flow {
         if (host.isBlank()) throw AssistantUnavailable(
-            "The assistant isn't set up yet",
+            "Grace isn't set up yet",
             "Open Settings → Assistant and enter your PC's address, e.g. 192.168.1.50. See docs/ai-setup.md.",
         )
         val base = baseUrl(host)

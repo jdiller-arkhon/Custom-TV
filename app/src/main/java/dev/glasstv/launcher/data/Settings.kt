@@ -17,7 +17,7 @@ enum class ThemeMode { LIGHT, DARK, AUTO }
 data class PairedPhone(val id: String, val name: String, val tokenHash: String, val pairedAt: Long)
 
 data class Settings(
-    val greetingName: String = "",
+    val greetingName: String = dev.glasstv.launcher.Personal.NAME,
     val theme: ThemeMode = ThemeMode.LIGHT,
     val reduceMotion: Boolean = false,
     val extraBlur: Boolean = false,
@@ -40,7 +40,6 @@ private val Context.store by preferencesDataStore("settings")
 
 class SettingsRepository(private val context: Context) {
     private object K {
-        val name = stringPreferencesKey("greeting_name")
         val theme = stringPreferencesKey("theme")
         val reduceMotion = booleanPreferencesKey("reduce_motion")
         val extraBlur = booleanPreferencesKey("extra_blur")
@@ -60,7 +59,6 @@ class SettingsRepository(private val context: Context) {
     val settings: Flow<Settings> = context.store.data.map { it.toSettings() }
 
     private fun Preferences.toSettings() = Settings(
-        greetingName = this[K.name] ?: "",
         theme = this[K.theme]?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() } ?: ThemeMode.LIGHT,
         reduceMotion = this[K.reduceMotion] ?: false,
         extraBlur = this[K.extraBlur] ?: false,
@@ -77,7 +75,6 @@ class SettingsRepository(private val context: Context) {
         recents = this[K.recents]?.split(',')?.filter { it.isNotBlank() } ?: emptyList(),
     )
 
-    suspend fun setName(v: String) = context.store.edit { it[K.name] = v.trim().take(40) }
     suspend fun setTheme(v: ThemeMode) = context.store.edit { it[K.theme] = v.name }
     suspend fun setReduceMotion(v: Boolean) = context.store.edit { it[K.reduceMotion] = v }
     suspend fun setExtraBlur(v: Boolean) = context.store.edit { it[K.extraBlur] = v }

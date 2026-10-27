@@ -43,7 +43,7 @@ Regenerate: `./gradlew :app:testDebugUnitTest -PtvScreens --tests '*TvScreensTes
 | **Assistant** | Glass sheet slides in from the right. Streams from Ollama. Quick-prompt chips. "open Netflix" style commands run locally. Plain-language error card with the fix when the PC is unreachable. |
 | **Phone remote** | Pink-glass web remote with app **shortcuts** (real icons) and quick actions (Assistant, Ambient, Settings), plus D-pad, OK, back, home, media keys, volume, touchpad, keyboard and dictation. WebSocket with auto-reconnect. 4-digit pairing, remembered phones, revoke in Settings. |
 | **Ambient** | After 3 idle minutes: a big clock over the drifting orbs. Any button wakes it. |
-| **Settings** | Name, theme (light/dark/auto), reduce motion, weather location and units, Ollama host and model with a connection test, home-button control, favorites, paired phones, QR, and shortcuts to Android TV settings and inputs. Persisted with DataStore. |
+| **Settings** | Theme (light/dark/auto), reduce motion, weather location and units, Ollama host and model with a connection test, home-button control, favorites, paired phones, QR, and shortcuts to Android TV settings and inputs. Persisted with DataStore. |
 
 ## Project layout
 

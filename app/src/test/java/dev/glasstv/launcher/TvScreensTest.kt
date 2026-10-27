@@ -59,7 +59,6 @@ class TvScreensTest {
 
     @Before fun setUp() = runBlocking {
         app.settingsRepo.setOnboarded()
-        app.settingsRepo.setName("Jess")
         app.settingsRepo.recordLaunch("com.disney.disneyplus")
         app.settingsRepo.recordLaunch("com.netflix.ninja")
         app.appRepo.refresh()
