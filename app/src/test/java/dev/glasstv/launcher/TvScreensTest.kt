@@ -61,6 +61,11 @@ class TvScreensTest {
         app.settingsRepo.setOnboarded()
         app.settingsRepo.recordLaunch("com.disney.disneyplus")
         app.settingsRepo.recordLaunch("com.netflix.ninja")
+        val n = java.time.LocalDateTime.now()
+        listOf(
+            "add date night tomorrow at 8pm", "add dinner with Mom on Friday at 7pm", "remind me to call the vet in 2 days at noon",
+            "add Anna's birthday in 9 days", "add yoga in 4 days in the morning",
+        ).forEach { s -> dev.glasstv.launcher.ai.EventParser.parse(s, n)?.let { p -> app.calendar.add(dev.glasstv.launcher.data.CalEvent(title = p.title, start = p.start, allDay = p.allDay, emoji = p.emoji)) } }
         app.appRepo.refresh()
     }
 
@@ -88,6 +93,9 @@ class TvScreensTest {
         compose.mainClock.advanceTimeBy(4000)
         shot("tv-date-night-light")
         compose.runOnUiThread { compose.activity.ui.dateNight = false }
+        compose.runOnUiThread { compose.activity.ui.calendarOpen = true }
+        shot("tv-calendar-light")
+        compose.runOnUiThread { compose.activity.ui.calendarOpen = false; app.assistant.send("Add movie night with Anna on Saturday at 8:30") }
         compose.runOnUiThread { compose.activity.ui.aiOpen = true }
         shot("tv-assistant-light")
         compose.runOnUiThread { compose.activity.ui.aiOpen = false; compose.activity.ui.settingsOpen = true }

@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -115,6 +116,8 @@ fun LauncherRoot(app: GlassApp, ui: LauncherUi) {
                 LocalCommand.OpenSettings -> { ui.aiOpen = false; ui.settingsOpen = true }
                 LocalCommand.Ambient -> { ui.aiOpen = false; ui.ambient = true }
                 LocalCommand.Home -> ui.goHome()
+                LocalCommand.OpenCalendar -> Unit // Grace answers in her panel; the Calendar button opens the full view
+                is LocalCommand.EventAdded -> ui.toast = "${it.event.emoji} Added: ${it.event.title} · ${it.event.whenText()}"
                 is LocalCommand.OpenApp -> Unit
             }
         }
@@ -136,7 +139,7 @@ fun LauncherRoot(app: GlassApp, ui: LauncherUi) {
         Box(Modifier.fillMaxSize()) {
             OrbBackground(settings.reduceMotion, settings.extraBlur, accent = accent)
 
-            val anyOverlay = ui.aiOpen || ui.settingsOpen || ui.qrOpen || ui.dateNight
+            val anyOverlay = ui.aiOpen || ui.settingsOpen || ui.qrOpen || ui.dateNight || ui.calendarOpen
             HomeScreen(
                 app, ui, settings, now, Modifier.fillMaxSize(), interactive = !anyOverlay && !ui.ambient,
                 onAccent = { a -> scope.launch { accent = app.appRepo.art(a)?.tint?.takeIf { it != 0 }?.let { Color(it) } } },
@@ -172,6 +175,27 @@ fun LauncherRoot(app: GlassApp, ui: LauncherUi) {
                     onAskGrace = { prompt -> ui.dateNight = false; ui.aiOpen = true; app.assistant.send(prompt) },
                     onClose = { ui.dateNight = false },
                 )
+            }
+
+            if (ui.calendarOpen && !ui.ambient) {
+                CalendarSheet(app, onAskGrace = { ui.calendarOpen = false; ui.aiOpen = true; app.assistant.setDraft("Add ") }, onClose = { ui.calendarOpen = false })
+            }
+
+            // Pink toast (event added / reminders), auto-hides.
+            val toast = ui.toast
+            LaunchedEffect(toast) { if (toast != null) { delay(5000); ui.toast = null } }
+            AnimatedVisibility(toast != null, Modifier.align(Alignment.TopCenter).padding(top = 28.dp), enter = fadeIn(), exit = fadeOut()) {
+                val c = LocalGlass.current
+                Row(
+                    Modifier.shadow(16.dp, RoundedCornerShape(50), ambientColor = c.shadow, spotColor = c.shadow)
+                        .background(c.glassFill, RoundedCornerShape(50)).border(1.dp, c.highlightTop, RoundedCornerShape(50))
+                        .padding(horizontal = 22.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    dev.glasstv.launcher.ui.components.CuteOrb(30.dp)
+                    Spacer(Modifier.width(10.dp))
+                    GlassText(toast.orEmpty(), GlassType.label, maxLines = 1)
+                }
             }
 
             PairingCodeToast(Modifier.align(Alignment.TopCenter).padding(top = 32.dp))
@@ -259,12 +283,21 @@ private fun HomeScreen(
             .padding(horizontal = 64.dp, vertical = 28.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        val events by app.calendar.events.collectAsState()
+        val next = remember(events, now) { app.calendar.upcoming(now).firstOrNull() }
         NavBar(settings, now, ui, Modifier.rise(0f))
 
         Spacer(Modifier.weight(0.55f))
         Text2("$greeting, ${settings.greetingName} ♡", GlassType.hero, c.text, Modifier.rise(0.08f))
         Spacer(Modifier.height(6.dp))
-        Text2(sub, GlassType.heroSub, c.textSoft, Modifier.rise(0.12f))
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.rise(0.12f)) {
+            Text2(sub, GlassType.heroSub, c.textSoft)
+            // Up next: the soonest event, one quiet link (opens the calendar).
+            if (next != null) {
+                Text2("   ·  ", GlassType.heroSub, c.textSoft)
+                NavLink("${next.emoji} ${next.title} · ${next.whenText(now)}", maxWidth = 460.dp) { ui.calendarOpen = true }
+            }
+        }
         Spacer(Modifier.height(24.dp))
 
         // The Perplexity-style ask box.
@@ -345,7 +378,7 @@ private fun Text2(text: String, style: androidx.compose.ui.text.TextStyle, color
     androidx.compose.foundation.text.BasicText(text, modifier, style.copy(color = color), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
 
 @Composable
-private fun NavBar(settings: Settings, now: LocalDateTime, ui: LauncherUi, modifier: Modifier) {
+private fun NavBar(settings: Settings, now: LocalDateTime, ui: LauncherUi, modifier: Modifier, next: dev.glasstv.launcher.data.CalEvent? = null) {
     val c = LocalGlass.current
     val weather = rememberWeather(settings)
     Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -357,13 +390,15 @@ private fun NavBar(settings: Settings, now: LocalDateTime, ui: LauncherUi, modif
             Text2("with ${dev.glasstv.launcher.Personal.ASSISTANT}", GlassType.small, c.cocoa)
         }
         Spacer(Modifier.weight(1f))
+        // Up next: the soonest event, quietly in the bar (opens the calendar).
         Text2(
-            listOfNotNull(now.format(DateTimeFormatter.ofPattern("h:mm a")), weather?.let { "${it.glyph} ${it.temp}°" }).joinToString("   ·   "),
+            listOfNotNull(now.format(DateTimeFormatter.ofPattern("h:mm")), weather?.let { "${it.glyph} ${it.temp}°" }).joinToString("   ·   "),
             GlassType.nav, c.textSoft,
         )
         Spacer(Modifier.width(22.dp))
         Box(Modifier.width(1.dp).height(22.dp).background(c.highlightTop))
         Spacer(Modifier.width(14.dp))
+        NavLink("Calendar") { ui.calendarOpen = true }
         NavLink("Ambient") { ui.ambient = true }
         NavLink("Phone remote") { ui.qrOpen = true }
         NavLink("Settings") { ui.settingsOpen = true }
@@ -372,7 +407,7 @@ private fun NavBar(settings: Settings, now: LocalDateTime, ui: LauncherUi, modif
 
 /** Quiet nav link; focus fills it with a soft pink pill. */
 @Composable
-private fun NavLink(text: String, onClick: () -> Unit) {
+private fun NavLink(text: String, maxWidth: androidx.compose.ui.unit.Dp = androidx.compose.ui.unit.Dp.Unspecified, onClick: () -> Unit) {
     val c = LocalGlass.current
     var focused by remember { mutableStateOf(false) }
     androidx.tv.material3.Surface(
@@ -385,7 +420,7 @@ private fun NavLink(text: String, onClick: () -> Unit) {
         scale = androidx.tv.material3.ClickableSurfaceDefaults.scale(focusedScale = 1.05f),
         glow = androidx.tv.material3.ClickableSurfaceDefaults.glow(androidx.tv.material3.Glow.None, androidx.tv.material3.Glow.None),
     ) {
-        Text2(text, GlassType.nav, if (focused) c.cocoa else c.textSoft, Modifier.padding(horizontal = 14.dp, vertical = 7.dp))
+        Text2(text, GlassType.nav, if (focused) c.cocoa else c.textSoft, Modifier.widthIn(max = maxWidth).padding(horizontal = 14.dp, vertical = 7.dp))
     }
 }
 
@@ -596,6 +631,12 @@ private fun AmbientScreen(now: LocalDateTime, settings: Settings) {
             )
             Spacer(Modifier.height(28.dp))
             dev.glasstv.launcher.ui.components.LoveNote(size = 34.sp, animate = !settings.reduceMotion, center = true)
+            val app = (androidx.compose.ui.platform.LocalContext.current.applicationContext as GlassApp)
+            val events by app.calendar.events.collectAsState()
+            remember(events, now) { app.calendar.upcoming(now).firstOrNull() }?.let { e ->
+                Spacer(Modifier.height(22.dp))
+                GlassText("${e.emoji}  ${e.title} · ${e.whenText(now)}", GlassType.title, color = c.textSoft, maxLines = 1)
+            }
         }
     }
 }

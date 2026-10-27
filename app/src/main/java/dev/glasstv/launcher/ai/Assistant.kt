@@ -21,6 +21,7 @@ class Assistant(
     private val config: () -> Pair<String, String>,
     private val apps: () -> Map<String, String>,
     private val onCommand: (LocalCommand) -> Unit,
+    private val calendar: dev.glasstv.launcher.data.CalendarStore? = null,
 ) {
     private val _state = MutableStateFlow(AssistantState())
     val state: StateFlow<AssistantState> = _state
@@ -43,12 +44,20 @@ class Assistant(
     fun send(text: String) {
         val prompt = text.trim()
         if (prompt.isEmpty()) return
+        calendarReply(prompt)?.let { reply ->
+            _state.value = _state.value.copy(
+                messages = _state.value.messages + ChatMessage("user", prompt) + ChatMessage("assistant", reply), error = null,
+            )
+            return
+        }
         LocalCommands.parse(prompt, apps())?.let { cmd ->
             val reply = when (cmd) {
                 is LocalCommand.OpenApp -> "Opening ${cmd.label}…"
                 LocalCommand.OpenSettings -> "Opening settings…"
                 LocalCommand.Ambient -> "Going ambient. Press any button to wake."
                 LocalCommand.Home -> "Here you go."
+                LocalCommand.OpenCalendar -> "Opening your calendar…"
+                is LocalCommand.EventAdded -> "Added ${cmd.event.title}."
             }
             _state.value = _state.value.copy(
                 messages = _state.value.messages + ChatMessage("user", prompt) + ChatMessage("assistant", reply),
@@ -78,6 +87,35 @@ class Assistant(
                 _state.value = AssistantState(history, false, AssistantUnavailable("Something went wrong", e.message ?: ""))
             }
         }
+    }
+
+    /** Calendar requests are handled on the TV (no PC needed): add events, or read the schedule back. */
+    private fun calendarReply(prompt: String): String? {
+        val cal = calendar ?: return null
+        val now = java.time.LocalDateTime.now()
+        EventParser.parse(prompt, now)?.let { p ->
+            val e = dev.glasstv.launcher.data.CalEvent(title = p.title, start = p.start, allDay = p.allDay, emoji = p.emoji)
+            cal.add(e)
+            onCommand(LocalCommand.EventAdded(e))
+            return "Added ${e.emoji} ${e.title} — ${e.whenText(now)} ♡ I'll remind you 10 minutes before."
+        }
+        val ask = Regex(
+            """\b(what'?s|what is|what do we have|what are we doing|do we have|show|anything)\b.*\b(calendar|schedule|plans?|planned|on (?:today|tomorrow|this week)|today|tomorrow|this week|weekend)\b""",
+            RegexOption.IGNORE_CASE,
+        )
+        if (!ask.containsMatchIn(prompt)) return null
+        onCommand(LocalCommand.OpenCalendar)
+        val today = now.toLocalDate()
+        val end = when {
+            prompt.contains("today", true) || prompt.contains("tonight", true) -> today
+            prompt.contains("tomorrow", true) -> today.plusDays(1)
+            prompt.contains("weekend", true) -> today.with(java.time.temporal.TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SUNDAY))
+            else -> today.plusDays(7)
+        }
+        val start = if (prompt.contains("tomorrow", true)) today.plusDays(1) else today
+        val list = cal.upcoming(now).filter { val d = it.start.toLocalDate(); !d.isBefore(start) && !d.isAfter(end) }
+        return if (list.isEmpty()) "Nothing on the calendar then — a perfect excuse for Date Night 💕"
+        else "Here's what's coming up:\n" + list.take(6).joinToString("\n") { "${it.emoji} ${it.title} — ${it.whenText(now)}" }
     }
 
     fun clear() {

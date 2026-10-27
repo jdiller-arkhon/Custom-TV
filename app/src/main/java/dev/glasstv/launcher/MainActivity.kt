@@ -25,11 +25,14 @@ class LauncherUi {
     var qrOpen by mutableStateOf(false)
     var ambient by mutableStateOf(false)
     var dateNight by mutableStateOf(false)
+    var calendarOpen by mutableStateOf(false)
+    /** Short pink toast at the top (event added, reminders). */
+    var toast by mutableStateOf<String?>(null)
     /** Bumped when HOME is pressed while already home, so the grid can scroll back to the top. */
     var homeTick by mutableIntStateOf(0)
 
     fun goHome() {
-        aiOpen = false; settingsOpen = false; qrOpen = false; ambient = false; dateNight = false
+        aiOpen = false; settingsOpen = false; qrOpen = false; ambient = false; dateNight = false; calendarOpen = false
         homeTick++
     }
 }
@@ -41,6 +44,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent { LauncherRoot(application as GlassApp, ui) }
         RemoteService.start(this)
+        if (android.os.Build.VERSION.SDK_INT >= 33 && checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1)
+        }
     }
 
     override fun onResume() {
@@ -103,6 +109,7 @@ class MainActivity : ComponentActivity() {
             QuickAction.AMBIENT -> { ui.goHome(); ui.ambient = true }
             QuickAction.SETTINGS -> { ui.goHome(); ui.settingsOpen = true }
             QuickAction.DATE_NIGHT -> { ui.goHome(); ui.dateNight = true }
+            QuickAction.CALENDAR -> { ui.goHome(); ui.calendarOpen = true }
         }
     }
 

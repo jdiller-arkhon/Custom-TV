@@ -6,6 +6,8 @@ sealed interface LocalCommand {
     data object OpenSettings : LocalCommand
     data object Ambient : LocalCommand
     data object Home : LocalCommand
+    data object OpenCalendar : LocalCommand
+    data class EventAdded(val event: dev.glasstv.launcher.data.CalEvent) : LocalCommand
 }
 
 object LocalCommands {

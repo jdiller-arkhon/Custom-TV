@@ -36,6 +36,7 @@ class GlassApp : Application() {
     lateinit var appRepo: AppRepository
     lateinit var remoteServer: RemoteServer
     lateinit var assistant: Assistant
+    lateinit var calendar: dev.glasstv.launcher.data.CalendarStore
 
     /** null until DataStore has loaded, so the first frame never flashes the wrong theme. */
     lateinit var settings: StateFlow<Settings?>
@@ -48,6 +49,7 @@ class GlassApp : Application() {
         settingsRepo = SettingsRepository(this)
         settings = settingsRepo.settings.stateIn(scope, SharingStarted.Eagerly, null)
         appRepo = AppRepository(this, scope)
+        calendar = dev.glasstv.launcher.data.CalendarStore(this, scope)
         remoteServer = RemoteServer(
             this, settingsRepo,
             settingsRepo.settings.map { it.pairedPhones }.stateIn(scope, SharingStarted.Eagerly, emptyList()),
@@ -61,9 +63,11 @@ class GlassApp : Application() {
             onCommand = { cmd ->
                 if (cmd is LocalCommand.OpenApp) appRepo.launch(cmd.packageName) else uiCommands.tryEmit(cmd)
             },
+            calendar = calendar,
         )
         appRepo.onLaunched = { pkg -> scope.launch { settingsRepo.recordLaunch(pkg) } }
         seedDefaultPins()
+        Reminders.start(this)
         scope.launch { RemoteBus.commands.collect(::route) }
     }
 
