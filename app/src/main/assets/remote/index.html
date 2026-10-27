@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#FBE8EE" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1E1020" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Glass TV Remote</title>
+<style>
+:root{
+  --bg:#FBE8EE;--pink:#F7C6D9;--rose:#E58FB0;--lilac:#D9C8F5;--peach:#FFD3C4;
+  --text:#3B1F33;--soft:rgba(59,31,51,.6);--faint:rgba(59,31,51,.35);
+  --glass:rgba(255,255,255,.42);--glass-2:rgba(255,255,255,.62);--hi:rgba(255,255,255,.9);--lo:rgba(255,255,255,.25);
+  --shadow:rgba(229,143,176,.30);--glow:rgba(229,143,176,.55);--orb:.8;
+  --serif:"Fraunces","Iowan Old Style","Palatino Linotype",Georgia,serif;
+  --sans:"Figtree",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#1E1020;--pink:#F07BAA;--rose:#FF8FC0;--lilac:#A98BEA;--peach:#F2A58E;
+  --text:#FCEAF1;--soft:rgba(252,234,241,.62);--faint:rgba(252,234,241,.3);
+  --glass:rgba(255,255,255,.09);--glass-2:rgba(255,255,255,.16);--hi:rgba(255,255,255,.28);--lo:rgba(255,255,255,.05);
+  --shadow:rgba(255,143,192,.18);--glow:rgba(255,143,192,.5);--orb:.5}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:16px/1.4 var(--sans);overflow:hidden;touch-action:manipulation;-webkit-font-smoothing:antialiased}
+svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* Signature drifting orbs */
+.orbs{position:fixed;inset:-20%;z-index:-1;filter:blur(48px);opacity:var(--orb)}
+.orbs i{position:absolute;border-radius:50%;animation:drift 26s ease-in-out infinite alternate}
+.orbs i:nth-child(1){width:70vmax;height:70vmax;left:-10%;top:-12%;background:radial-gradient(circle,var(--pink),transparent 68%)}
+.orbs i:nth-child(2){width:60vmax;height:60vmax;right:-15%;top:28%;background:radial-gradient(circle,var(--lilac),transparent 68%);animation-duration:32s;animation-delay:-8s}
+.orbs i:nth-child(3){width:55vmax;height:55vmax;left:5%;bottom:-18%;background:radial-gradient(circle,var(--peach),transparent 68%);animation-duration:38s;animation-delay:-16s}
+@keyframes drift{0%{transform:translate(0,0) scale(1)}50%{transform:translate(6vw,4vh) scale(1.08)}100%{transform:translate(-4vw,7vh) scale(.95)}}
+@media (prefers-reduced-motion:reduce){.orbs i{animation:none}}
+
+.glass{background:var(--glass);border:1px solid transparent;border-radius:28px;
+  background-image:linear-gradient(var(--glass),var(--glass)),linear-gradient(180deg,var(--hi),var(--lo));
+  background-origin:border-box;background-clip:padding-box,border-box;
+  backdrop-filter:blur(22px) saturate(1.4);-webkit-backdrop-filter:blur(22px) saturate(1.4);
+  box-shadow:0 12px 32px var(--shadow),inset 0 1px 0 var(--hi)}
+
+main{position:relative;max-width:460px;height:100%;margin:0 auto;display:flex;flex-direction:column;
+  padding:max(18px,env(safe-area-inset-top)) 18px calc(96px + env(safe-area-inset-bottom))}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:4px 4px 14px}
+.hello small{display:block;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
+.hello h1{margin:2px 0 0;font:300 32px/1.05 var(--serif);letter-spacing:-.01em}
+.pill{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;font-size:13px;color:var(--soft);white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--faint);transition:.3s}
+.dot.on{background:#5BD6A0;box-shadow:0 0 0 4px rgba(91,214,160,.18)}
+
+.pane{flex:1;min-height:0;display:none;flex-direction:column;gap:16px;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;padding:6px 18px 28px;margin:0 -18px;animation:in .28s ease}
+.pane::-webkit-scrollbar{display:none}.pane.on{display:flex}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+h2{margin:6px 4px -4px;font:600 12px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--soft)}
+
+button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:15px;border-radius:22px;font-weight:500;transition:transform .12s cubic-bezier(.3,1.6,.6,1),box-shadow .2s}
+.btn.hit,.tile.hit,.qa.hit{transform:scale(.93);box-shadow:0 0 0 2px var(--rose),0 0 26px var(--glow)}
+.row{display:flex;gap:12px}.row>*{flex:1}
+
+/* Quick actions */
+.qas{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.qa{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 4px 12px;border-radius:24px;font-size:12.5px;font-weight:500;transition:transform .12s cubic-bezier(.3,1.6,.6,1),box-shadow .2s}
+.qa .ic{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--glass-2);box-shadow:inset 0 1px 0 var(--hi)}
+.orb-ic{background:radial-gradient(circle at 35% 30%,#fff 0 12%,var(--pink) 42%,var(--rose) 72%,var(--lilac))!important;box-shadow:0 0 18px var(--glow)!important}
+
+/* D-pad */
+.dpad{position:relative;width:min(80vw,300px);aspect-ratio:1;margin:4px auto 0;border-radius:50%}
+.dpad::before{content:"";position:absolute;inset:-3px;border-radius:50%;z-index:-1;opacity:.6;
+  background:conic-gradient(from 210deg,var(--pink),var(--lilac),var(--peach),var(--rose),var(--pink));filter:blur(10px)}
+.dpad .d{position:absolute;width:30%;height:30%;display:grid;place-items:center;border-radius:50%;color:var(--soft);transition:color .15s,transform .12s}
+.dpad .d svg{width:30px;height:30px;stroke-width:2.2}
+.dpad .d.hit{color:var(--rose);transform:scale(.88)}
+.dpad .up{top:3%;left:35%}.dpad .down{bottom:3%;left:35%}.dpad .left{left:3%;top:35%}.dpad .right{right:3%;top:35%}
+.dpad .ok{position:absolute;top:29%;left:29%;width:42%;height:42%;border-radius:50%;font:600 19px/1 var(--sans);letter-spacing:.06em;color:#fff;
+  background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.95) 0 8%,var(--pink) 38%,var(--rose) 78%);
+  box-shadow:0 10px 26px var(--glow),inset 0 2px 0 rgba(255,255,255,.7),inset 0 -6px 14px rgba(160,60,110,.25);
+  text-shadow:0 1px 2px rgba(120,30,80,.35);transition:transform .12s cubic-bezier(.3,1.6,.6,1)}
+.dpad .ok.hit{transform:scale(.92)}
+.vol{display:flex;align-items:center;border-radius:22px;overflow:hidden}
+.vol button{flex:1;display:grid;place-items:center;padding:15px 0;transition:background .15s}
+.vol button.hit{background:var(--glass-2)}
+.vol span{font-size:11px;letter-spacing:.14em;color:var(--soft);text-transform:uppercase}
+
+/* Shortcut grid */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.tile{display:flex;flex-direction:column;align-items:center;gap:7px;padding:12px 4px 10px;border-radius:22px;min-width:0;transition:transform .12s cubic-bezier(.3,1.6,.6,1),box-shadow .2s}
+.tile img,.tile .ph{width:52px;height:52px;border-radius:15px;object-fit:cover;box-shadow:0 6px 16px var(--shadow)}
+.tile .ph{display:grid;place-items:center;font:600 22px/1 var(--serif);background:linear-gradient(135deg,var(--pink),var(--lilac));color:#fff}
+.tile b{font-size:12px;font-weight:500;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty{padding:28px;text-align:center;color:var(--soft);font-size:14px}
+
+/* Typing */
+textarea{width:100%;min-height:120px;resize:none;font:inherit;font-size:18px;color:var(--text);background:var(--glass-2);border:1px solid var(--hi);
+  border-radius:24px;padding:16px 18px;outline:none;-webkit-user-select:text;user-select:text;transition:box-shadow .2s,border-color .2s}
+textarea::placeholder{color:var(--faint)}
+textarea:focus{border-color:var(--rose);box-shadow:0 0 0 4px var(--shadow)}
+.primary{color:#fff;background:linear-gradient(135deg,var(--rose),#D477A6);box-shadow:0 10px 24px var(--glow)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:10px 15px;border-radius:999px;font-size:14px;transition:transform .12s}
+.chip.hit{transform:scale(.94)}
+.hint{margin:0 4px;font-size:13px;color:var(--soft)}
+
+/* Touchpad */
+.pad{flex:1;min-height:260px;position:relative;display:grid;place-items:center;text-align:center;color:var(--faint);font-size:14px;touch-action:none;overflow:hidden}
+.pad .ripple{position:absolute;width:70px;height:70px;margin:-35px 0 0 -35px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,var(--glow),transparent 70%);animation:rip .45s ease-out forwards}
+@keyframes rip{from{transform:scale(.4);opacity:1}to{transform:scale(2.4);opacity:0}}
+
+/* Tab bar */
+nav{position:fixed;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(calc(100% - 36px),424px);
+  display:flex;padding:6px;border-radius:30px;z-index:3}
+nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 0 7px;border-radius:24px;font-size:11.5px;font-weight:500;color:var(--soft);transition:background .2s,color .2s}
+nav button.sel{color:var(--text);background:var(--glass-2);box-shadow:inset 0 1px 0 var(--hi),0 4px 14px var(--shadow)}
+nav button.sel svg{stroke:var(--rose)}
+
+/* Pairing sheet */
+#pair{position:fixed;inset:0;z-index:5;display:none;align-items:center;justify-content:center;padding:24px;
+  background:color-mix(in srgb,var(--bg) 55%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+#pair.on{display:flex}
+#pair .card{width:100%;max-width:360px;padding:30px 26px 22px;text-align:center;border-radius:32px;animation:in .3s ease}
+#pair h1{margin:0;font:300 30px/1.1 var(--serif)}
+.digits{display:flex;justify-content:center;gap:10px;margin:22px 0 8px}
+.digits span{width:56px;height:68px;border-radius:18px;display:grid;place-items:center;font:500 30px/1 var(--serif);background:var(--glass-2);border:1px solid var(--hi);transition:.2s}
+.digits span.cur{border-color:var(--rose);box-shadow:0 0 0 4px var(--shadow)}
+#code{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
+.err{min-height:20px;font-size:14px;color:#D2477F}
+.link{margin-top:10px;font-size:13px;color:var(--soft);text-decoration:underline;text-underline-offset:3px}
+.toast{position:fixed;left:50%;top:max(16px,env(safe-area-inset-top));transform:translate(-50%,calc(-100% - 60px));padding:10px 16px;border-radius:999px;font-size:14px;z-index:6;transition:transform .3s cubic-bezier(.3,1.4,.6,1)}
+.toast.on{transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<div class="orbs"><i></i><i></i><i></i></div>
+
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 010 11H11"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V20h5v-6h4v6h5V9.5"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 5v14l11-7z"/></symbol>
+  <symbol id="i-rew" viewBox="0 0 24 24"><path d="M11 18l-8-6 8-6zM21 18l-8-6 8-6z"/></symbol>
+  <symbol id="i-ff" viewBox="0 0 24 24"><path d="M13 18l8-6-8-6zM3 18l8-6-8-6z"/></symbol>
+  <symbol id="i-mute" viewBox="0 0 24 24"><path d="M11 5L6 9H3v6h3l5 4z"/><path d="M22 9l-6 6M16 9l6 6"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 019.5 4a8 8 0 1010.5 10.5z"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></symbol>
+  <symbol id="i-remote" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="5"/><circle cx="12" cy="8" r="2"/><path d="M10 14h4M10 17h4"/></symbol>
+  <symbol id="i-apps" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></symbol>
+  <symbol id="i-touch" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="4"/><circle cx="12" cy="12" r="2.5"/></symbol>
+  <symbol id="i-type" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="3"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></symbol>
+  <symbol id="i-bs" viewBox="0 0 24 24"><path d="M21 5H9l-6 7 6 7h12a1 1 0 001-1V6a1 1 0 00-1-1z"/><path d="M17 9l-5 6M12 9l5 6"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+</svg>
+
+<main>
+  <header>
+    <div class="hello"><small id="when">Glass TV</small><h1 id="greet">Hello</h1></div>
+    <div class="pill glass"><span class="dot" id="dot"></span><span id="st">Connecting…</span></div>
+  </header>
+
+  <!-- REMOTE -->
+  <section class="pane on" id="remote">
+    <div class="qas">
+      <button class="qa glass" data-a="assistant"><span class="ic orb-ic"></span>Assistant</button>
+      <button class="qa glass" data-a="home"><span class="ic"><svg><use href="#i-home"/></svg></span>Home</button>
+      <button class="qa glass" data-a="ambient"><span class="ic"><svg><use href="#i-moon"/></svg></span>Ambient</button>
+      <button class="qa glass" data-a="settings"><span class="ic"><svg><use href="#i-gear"/></svg></span>Settings</button>
+    </div>
+    <div class="dpad glass">
+      <button class="d up" data-k="up" aria-label="Up"><svg><use href="#i-up"/></svg></button>
+      <button class="d down" data-k="down" aria-label="Down"><svg><use href="#i-down"/></svg></button>
+      <button class="d left" data-k="left" aria-label="Left"><svg><use href="#i-left"/></svg></button>
+      <button class="d right" data-k="right" aria-label="Right"><svg><use href="#i-right"/></svg></button>
+      <button class="ok" data-k="ok">OK</button>
+    </div>
+    <div class="row">
+      <button class="btn glass" data-k="back"><svg><use href="#i-back"/></svg>Back</button>
+      <button class="btn glass" data-k="home"><svg><use href="#i-home"/></svg>Home</button>
+    </div>
+    <div class="row">
+      <button class="btn glass" data-k="rew" aria-label="Rewind"><svg><use href="#i-rew"/></svg></button>
+      <button class="btn glass" data-k="playpause" aria-label="Play or pause"><svg><use href="#i-play"/></svg></button>
+      <button class="btn glass" data-k="ff" aria-label="Fast forward"><svg><use href="#i-ff"/></svg></button>
+    </div>
+    <div class="vol glass">
+      <button data-v="down" aria-label="Volume down"><svg><use href="#i-minus"/></svg></button>
+      <button data-v="mute" aria-label="Mute"><span>Volume</span></button>
+      <button data-v="up" aria-label="Volume up"><svg><use href="#i-plus"/></svg></button>
+    </div>
+  </section>
+
+  <!-- SHORTCUTS -->
+  <section class="pane" id="apps">
+    <h2>Favorites</h2>
+    <div class="grid" id="fav"><div class="empty glass" style="grid-column:1/-1">Loading your apps…</div></div>
+    <h2 id="moreH" hidden>More apps</h2>
+    <div class="grid" id="more"></div>
+  </section>
+
+  <!-- TOUCHPAD -->
+  <section class="pane" id="touch">
+    <div class="pad glass" id="pad"><div>Swipe to move · Tap to select<br>Two-finger tap to go back</div></div>
+    <div class="row">
+      <button class="btn glass" data-k="back"><svg><use href="#i-back"/></svg>Back</button>
+      <button class="btn glass" data-k="playpause"><svg><use href="#i-play"/></svg></button>
+      <button class="btn glass" data-k="home"><svg><use href="#i-home"/></svg>Home</button>
+    </div>
+  </section>
+
+  <!-- TYPE -->
+  <section class="pane" id="type">
+    <textarea id="txt" placeholder="Type, or tap 🎤 on your keyboard to dictate…" autocomplete="off" autocapitalize="sentences"></textarea>
+    <div class="row">
+      <button class="btn glass" id="bs" style="flex:0 0 76px" aria-label="Backspace"><svg><use href="#i-bs"/></svg></button>
+      <button class="btn primary" id="send">Send <svg><use href="#i-send"/></svg></button>
+    </div>
+    <p class="hint">Types into the focused box on the TV, or asks the assistant if none is focused.</p>
+    <h2>Ask the assistant</h2>
+    <div class="chips">
+      <button class="chip glass" data-say="What should we watch tonight? Suggest 4 options across moods.">🍿 What should we watch?</button>
+      <button class="chip glass" data-fill="Recap the latest season of ">📺 Recap a show</button>
+      <button class="chip glass" data-fill="Who's in the cast of ">🎭 Who's in this?</button>
+      <button class="chip glass" data-say="Recommend 4 feel-good comedies, a mix of films and series.">😂 Something funny</button>
+    </div>
+  </section>
+</main>
+
+<nav class="glass">
+  <button data-tab="remote" class="sel"><svg><use href="#i-remote"/></svg>Remote</button>
+  <button data-tab="apps"><svg><use href="#i-apps"/></svg>Shortcuts</button>
+  <button data-tab="touch"><svg><use href="#i-touch"/></svg>Touchpad</button>
+  <button data-tab="type"><svg><use href="#i-type"/></svg>Type</button>
+</nav>
+
+<div id="pair"><div class="card glass">
+  <h1>Pair this phone</h1>
+  <p class="hint" style="margin-top:8px">Enter the 4-digit code on your TV</p>
+  <label class="digits" for="code"><span></span><span></span><span></span><span></span></label>
+  <input id="code" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="one-time-code">
+  <div class="err" id="perr"></div>
+  <button class="btn primary" id="pbtn" style="width:100%">Pair</button>
+  <button class="link" id="again">Show a new code</button>
+</div></div>
+<div class="toast glass" id="toast"></div>
+
+<script>
+(() => {
+  const $ = s => document.querySelector(s), $$ = s => document.querySelectorAll(s);
+  const KEY = 'glasstv.token';
+  let token = localStorage.getItem(KEY), ws = null, backoff = 500, pingT = null;
+  const vib = (ms = 8) => { try { navigator.vibrate && navigator.vibrate(ms) } catch (e) {} };
+  const status = (on, text) => { $('#dot').classList.toggle('on', on); $('#st').textContent = text; };
+  const send = o => { if (ws && ws.readyState === 1) { ws.send(JSON.stringify(o)); return true } toast('Not connected'); return false; };
+  let toastT; const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 1600); };
+
+  // Greeting
+  const h = new Date().getHours();
+  $('#greet').textContent = h < 5 ? 'Good night' : h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : h < 22 ? 'Good evening' : 'Good night';
+  $('#when').textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+
+  function connect() {
+    if (!token) { showPair(); return; }
+    ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws`);
+    ws.onopen = () => ws.send(JSON.stringify({ t: 'auth', token }));
+    ws.onmessage = e => {
+      const m = JSON.parse(e.data);
+      if (m.t === 'ok') { backoff = 500; status(true, 'Connected'); clearInterval(pingT); pingT = setInterval(() => send({ t: 'ping' }), 10000); }
+      if (m.t === 'apps') renderApps(m.apps || []);
+      if (m.t === 'unauthorized') { localStorage.removeItem(KEY); token = null; showPair(); }
+    };
+    ws.onclose = () => { clearInterval(pingT); status(false, 'Reconnecting…'); if (token) setTimeout(connect, backoff); backoff = Math.min(backoff * 2, 8000); };
+    ws.onerror = () => ws.close();
+  }
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && token && (!ws || ws.readyState > 1)) { backoff = 500; connect(); } });
+
+  // Shortcuts grid (icons come from the TV)
+  function tile(a) {
+    const b = document.createElement('button'); b.className = 'tile glass';
+    if (a.icon) { const i = new Image(); i.src = a.icon; i.alt = ''; b.append(i); }
+    else { const p = document.createElement('span'); p.className = 'ph'; p.textContent = (a.label || '?')[0]; b.append(p); }
+    const l = document.createElement('b'); l.textContent = a.label; b.append(l);
+    press(b, () => { if (send({ t: 'launch', pkg: a.pkg })) toast(`Opening ${a.label}`); });
+    return b;
+  }
+  function renderApps(apps) {
+    const fav = apps.filter(a => a.pinned), more = apps.filter(a => !a.pinned);
+    $('#fav').replaceChildren(...(fav.length ? fav.map(tile) : [Object.assign(document.createElement('div'), { className: 'empty glass', style: 'grid-column:1/-1', textContent: 'No favorites yet. Long-press OK on a tile on the TV to pin one.' })]));
+    $('#more').replaceChildren(...more.map(tile)); $('#moreH').hidden = !more.length;
+  }
+
+  // Pairing
+  async function startPair() {
+    $('#perr').textContent = '';
+    try { await fetch('/api/pair/start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }); }
+    catch (e) { $('#perr').textContent = "Can't reach the TV. Same Wi-Fi?"; }
+  }
+  const drawDigits = () => { const v = $('#code').value; $$('.digits span').forEach((s, i) => { s.textContent = v[i] || ''; s.classList.toggle('cur', i === Math.min(v.length, 3)); }); };
+  function showPair() { status(false, 'Not paired'); $('#pair').classList.add('on'); startPair(); drawDigits(); setTimeout(() => $('#code').focus(), 60); }
+  async function confirmPair() {
+    const code = $('#code').value.trim();
+    if (!/^\d{4}$/.test(code)) { $('#perr').textContent = 'Enter all 4 digits.'; return; }
+    const name = /iPhone|iPad/.test(navigator.userAgent) ? 'iPhone' : /Android/.test(navigator.userAgent) ? 'Android phone' : 'Phone';
+    const r = await fetch('/api/pair/confirm', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code, name }) }).catch(() => null);
+    if (!r) { $('#perr').textContent = "Can't reach the TV."; return; }
+    const j = await r.json();
+    if (j.token) { token = j.token; localStorage.setItem(KEY, token); $('#pair').classList.remove('on'); $('#code').value = ''; vib(30); toast('Paired ✓'); connect(); }
+    else { vib([20, 40, 20]); $('#perr').textContent = j.error === 'expired' ? 'That code expired. New one on the TV…' : 'Wrong code. Try again.'; $('#code').value = ''; drawDigits(); if (j.error === 'expired') startPair(); }
+  }
+  $('#pbtn').onclick = confirmPair;
+  $('#code').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4); drawDigits(); if (e.target.value.length === 4) confirmPair(); });
+  $('.digits').addEventListener('click', () => $('#code').focus());
+  $('#again').onclick = startPair;
+
+  // Press helper: instant on pointerdown, optional hold-to-repeat.
+  function press(el, fn, repeat = false) {
+    let rep = null;
+    el.addEventListener('pointerdown', e => {
+      e.preventDefault(); vib(); fn(); el.classList.add('hit');
+      if (repeat) rep = setTimeout(function r() { fn(); rep = setTimeout(r, 110); }, 420);
+    });
+    const end = () => { clearTimeout(rep); el.classList.remove('hit'); };
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => el.addEventListener(t, end));
+  }
+  $$('[data-k]').forEach(b => press(b, () => send({ t: 'key', k: b.dataset.k }), ['up', 'down', 'left', 'right'].includes(b.dataset.k)));
+  $$('[data-v]').forEach(b => press(b, () => send({ t: 'vol', d: b.dataset.v }), b.dataset.v !== 'mute'));
+  $$('[data-a]').forEach(b => press(b, () => send({ t: 'action', a: b.dataset.a })));
+
+  // Tabs
+  $$('nav button').forEach(b => b.onclick = () => {
+    vib(5);
+    $$('nav button').forEach(x => x.classList.toggle('sel', x === b));
+    $$('.pane').forEach(p => p.classList.toggle('on', p.id === b.dataset.tab));
+    if (b.dataset.tab === 'apps') send({ t: 'apps' });
+    if (b.dataset.tab === 'type') setTimeout(() => $('#txt').focus(), 60);
+  });
+
+  // Touchpad: swipe = direction (every 60px), tap = OK, two-finger tap = back.
+  const pad = $('#pad'); let sx = 0, sy = 0, moved = false, fingers = 0;
+  const ripple = (x, y) => { const r = pad.getBoundingClientRect(), d = document.createElement('span'); d.className = 'ripple'; d.style.left = (x - r.left) + 'px'; d.style.top = (y - r.top) + 'px'; pad.append(d); setTimeout(() => d.remove(), 460); };
+  pad.addEventListener('touchstart', e => { e.preventDefault(); fingers = e.touches.length; const t = e.touches[0]; sx = t.clientX; sy = t.clientY; moved = false; }, { passive: false });
+  pad.addEventListener('touchmove', e => {
+    e.preventDefault(); const t = e.touches[0], dx = t.clientX - sx, dy = t.clientY - sy;
+    if (Math.abs(dx) > 60 || Math.abs(dy) > 60) {
+      send({ t: 'key', k: Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up') });
+      vib(); ripple(t.clientX, t.clientY); sx = t.clientX; sy = t.clientY; moved = true;
+    }
+  }, { passive: false });
+  pad.addEventListener('touchend', e => { e.preventDefault(); if (!moved && !e.touches.length) { vib(); ripple(sx, sy); send({ t: 'key', k: fingers >= 2 ? 'back' : 'ok' }); } }, { passive: false });
+
+  // Typing
+  const txt = $('#txt');
+  const submit = () => { const v = txt.value; if (!v.trim()) return; if (send({ t: 'text', v, submit: true })) { txt.value = ''; vib(); toast('Sent to TV'); } };
+  $('#send').onclick = submit;
+  txt.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(); } });
+  press($('#bs'), () => { send({ t: 'backspace' }); txt.value = txt.value.slice(0, -1); }, true);
+  $$('[data-say]').forEach(b => b.onclick = () => { if (send({ t: 'text', v: b.dataset.say, submit: true })) { vib(); toast('Asking the assistant…'); } });
+  $$('[data-fill]').forEach(b => b.onclick = () => { txt.value = b.dataset.fill; txt.focus(); txt.setSelectionRange(txt.value.length, txt.value.length); });
+
+  connect();
+})();
+</script>
+</body>
+</html>

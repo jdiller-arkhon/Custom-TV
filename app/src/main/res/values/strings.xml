@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Glass TV</string>
+    <string name="a11y_label">Glass TV Home button</string>
+    <string name="a11y_description">Opens Glass TV when you press Home, and lets your paired phone send Home, Back and navigation to other apps. It does not read or store screen content.</string>
+</resources>

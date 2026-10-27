@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ollama runs on a LAN PC over plain HTTP at a user-chosen host, so cleartext must be allowed.
+     Public endpoints (Open-Meteo) are requested over HTTPS in code. -->
+<network-security-config xmlns:tools="http://schemas.android.com/tools">
+    <base-config cleartextTrafficPermitted="true" tools:ignore="InsecureBaseConfiguration" />
+</network-security-config>
