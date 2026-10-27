@@ -372,6 +372,54 @@ fun FireplaceApp(reduceMotion: Boolean, onClose: () -> Unit) {
                     drawPath(path, col.copy(alpha = 0.55f))
                 }
             }
+            // ---- Christmas tree, to the right of the fire ----
+            val tx = w * 0.84f; val base = h * 0.86f; val th = h * 0.62f
+            drawRect(Color(0xFF4A2C1E), Offset(tx - w * 0.012f, base - h * 0.06f), androidx.compose.ui.geometry.Size(w * 0.024f, h * 0.06f))
+            val greens = listOf(Color(0xFF1F5A3A), Color(0xFF26704A), Color(0xFF2E8556))
+            for (tier in 0 until 3) {
+                val top = base - h * 0.06f - th * (0.3f + tier * 0.3f)
+                val bottom = base - h * 0.06f - th * (tier * 0.27f)
+                val half = w * (0.11f - tier * 0.028f)
+                drawPath(androidx.compose.ui.graphics.Path().apply {
+                    moveTo(tx, top); lineTo(tx + half, bottom); lineTo(tx - half, bottom); close()
+                }, greens[tier])
+            }
+            // twinkling lights draped along the tiers
+            val bulbs = listOf(Color(0xFFFF6B8B), Color(0xFFFFD166), Color(0xFF7FD3FF), Color(0xFFFFFFFF), Color(0xFFB98CFF))
+            var n = 0
+            for (tier in 0 until 3) {
+                val y = base - h * 0.06f - th * (tier * 0.27f) - th * 0.05f
+                val half = w * (0.10f - tier * 0.028f)
+                for (k in 0..6) {
+                    val f = k / 6f
+                    val bx = tx - half + f * half * 2
+                    val by = y - kotlin.math.sin(f * 3.14f) * th * 0.06f
+                    val tw = 0.55f + 0.45f * sin(t * 6.28f * 2 + n * 1.7f)
+                    val col = bulbs[n % bulbs.size]
+                    drawCircle(col.copy(alpha = 0.25f * tw), 16f, Offset(bx, by))
+                    drawCircle(col.copy(alpha = 0.6f + 0.4f * tw), 6f, Offset(bx, by))
+                    n++
+                }
+            }
+            // gold star with a soft glow
+            val sy = base - h * 0.06f - th * 0.9f - 8f
+            drawCircle(Color(0xFFFFD166).copy(alpha = 0.25f + 0.15f * sin(t * 6.28f)), 46f, Offset(tx, sy))
+            drawPath(androidx.compose.ui.graphics.Path().apply {
+                for (k in 0 until 10) {
+                    val r = if (k % 2 == 0) 30f else 13f
+                    val ang = -Math.PI / 2 + k * Math.PI / 5
+                    val px = tx + (r * kotlin.math.cos(ang)).toFloat(); val py = sy + (r * kotlin.math.sin(ang)).toFloat()
+                    if (k == 0) moveTo(px, py) else lineTo(px, py)
+                }
+                close()
+            }, Color(0xFFFFD166))
+            // presents
+            listOf(Triple(-0.07f, Color(0xFFE85A7A), 0.07f), Triple(0.035f, Color(0xFFF4B6C8), 0.055f), Triple(-0.005f, Color(0xFFC9A36A), 0.045f)).forEach { (dx, col, sz) ->
+                val px = tx + w * dx; val ps = w * sz
+                drawRect(col, Offset(px - ps / 2, base - ps * 0.8f), androidx.compose.ui.geometry.Size(ps, ps * 0.8f))
+                drawRect(Color.White.copy(alpha = 0.85f), Offset(px - ps * 0.07f, base - ps * 0.8f), androidx.compose.ui.geometry.Size(ps * 0.14f, ps * 0.8f))
+                drawRect(Color.White.copy(alpha = 0.85f), Offset(px - ps / 2, base - ps * 0.47f), androidx.compose.ui.geometry.Size(ps, ps * 0.12f))
+            }
             // rising sparks
             sparks.forEach { (x, y0, sp) ->
                 val y = ((y0 + t * sp) % 1f)
@@ -379,7 +427,7 @@ fun FireplaceApp(reduceMotion: Boolean, onClose: () -> Unit) {
             }
         }
         Column(Modifier.align(Alignment.TopStart).padding(40.dp)) {
-            BasicText("🔥 Fireplace", style = GlassType.title.copy(color = Color(0xFFFFE7D6)))
+            BasicText("🔥🎄 Fireplace", style = GlassType.title.copy(color = Color(0xFFFFE7D6)))
             BasicText("Press Back to return ♡", style = GlassType.small.copy(color = Color(0xFFFFE7D6).copy(alpha = 0.6f)))
         }
         Box(Modifier.align(Alignment.TopEnd).padding(36.dp)) { Btn("Done", Modifier.initialFocus(first), onClick = onClose) }
