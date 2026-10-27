@@ -10,36 +10,29 @@
 <title>Glass TV Remote</title>
 <style>
 :root{
-  --bg:#FBE8EE;--pink:#F7C6D9;--rose:#E58FB0;--lilac:#D9C8F5;--peach:#FFD3C4;--cocoa:#5A3329;--latte:#DDB8A4;
-  --text:#3E2420;--soft:rgba(62,36,32,.62);--faint:rgba(62,36,32,.35);
-  --glass:#FFF4F6;--glass-2:#FFFFFF;--hi:#F3D3DE;--lo:#F3D3DE;
-  --shadow:rgba(229,143,176,.30);--glow:rgba(229,143,176,.55);--orb:.8;
+  --bg:#FFF8FB;--pink:#FCE4EE;--rose:#EC6AA0;--lilac:#F3E8FA;--peach:#FFEDE6;--cocoa:#6B3D52;--latte:#F1D9E3;
+  --text:#2A1A22;--soft:#8A6F7B;--faint:rgba(42,26,34,.32);
+  --glass:#FFFFFF;--glass-2:#FCE4EE;--hi:#F6DCE6;--lo:#F6DCE6;
+  --shadow:rgba(236,106,160,.16);--glow:rgba(236,106,160,.35);--dot:rgba(107,61,82,.08);
   --serif:"Fraunces","Iowan Old Style","Palatino Linotype",Georgia,serif;
   --sans:"Figtree",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
 }
 @media (prefers-color-scheme:dark){:root{
-  --bg:#22141A;--pink:#F07BAA;--rose:#FF8FC0;--lilac:#A98BEA;--peach:#F2A58E;--cocoa:#5C3A2E;--latte:#8A5A44;
-  --text:#FCEAF1;--soft:rgba(252,234,241,.62);--faint:rgba(252,234,241,.3);
-  --glass:#34222A;--glass-2:#45303A;--hi:#4E3641;--lo:#4E3641;
-  --shadow:rgba(255,143,192,.18);--glow:rgba(255,143,192,.5);--orb:.5}}
+  --bg:#161014;--pink:#3A2230;--rose:#F27AAE;--lilac:#241C28;--peach:#2A1E1E;--cocoa:#B0728E;--latte:#3A2A32;
+  --text:#F8EEF2;--soft:#B59AA7;--faint:rgba(248,238,242,.3);
+  --glass:#1F181C;--glass-2:#3A2230;--hi:#34262D;--lo:#34262D;
+  --shadow:rgba(242,122,174,.18);--glow:rgba(242,122,174,.35);--dot:rgba(255,255,255,.05)}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:16px/1.4 var(--sans);overflow:hidden;touch-action:manipulation;-webkit-font-smoothing:antialiased}
 svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
 
-/* Signature drifting orbs */
-.orbs{position:fixed;inset:-20%;z-index:-1;filter:blur(48px);opacity:var(--orb)}
-.orbs i{position:absolute;border-radius:50%;animation:drift 26s ease-in-out infinite alternate}
-.orbs i:nth-child(1){width:70vmax;height:70vmax;left:-10%;top:-12%;background:radial-gradient(circle,var(--pink),transparent 68%)}
-.orbs i:nth-child(2){width:60vmax;height:60vmax;right:-15%;top:28%;background:radial-gradient(circle,var(--lilac),transparent 68%);animation-duration:32s;animation-delay:-8s}
-.orbs i:nth-child(3){width:55vmax;height:55vmax;left:5%;bottom:-18%;background:radial-gradient(circle,var(--latte),transparent 68%);animation-duration:38s;animation-delay:-16s}
-@keyframes drift{0%{transform:translate(0,0) scale(1)}50%{transform:translate(6vw,4vh) scale(1.08)}100%{transform:translate(-4vw,7vh) scale(.95)}}
-@media (prefers-reduced-motion:reduce){.orbs i{animation:none}}
+/* Backdrop: faint dot grid + soft pink glow at the top (matches the TV) */
+.orbs{position:fixed;inset:0;z-index:-1;background:
+  radial-gradient(ellipse 80% 40% at 50% -5%,var(--glow),transparent 70%),
+  radial-gradient(circle,var(--dot) 1.2px,transparent 1.6px) 0 0/22px 22px;
+  -webkit-mask-image:linear-gradient(#000 55%,transparent);mask-image:linear-gradient(#000 55%,transparent)}
 
-.glass{background:var(--glass);border:1px solid transparent;border-radius:28px;
-  background-image:linear-gradient(var(--glass),var(--glass)),linear-gradient(180deg,var(--hi),var(--lo));
-  background-origin:border-box;background-clip:padding-box,border-box;
-  -webkit-
-  box-shadow:0 10px 26px var(--shadow)}
+.glass{background:var(--glass);border:1px solid var(--hi);border-radius:22px;box-shadow:0 6px 18px var(--shadow)}
 
 main{position:relative;max-width:460px;height:100%;margin:0 auto;display:flex;flex-direction:column;
   padding:max(18px,env(safe-area-inset-top)) 18px calc(96px + env(safe-area-inset-bottom))}
@@ -140,10 +133,20 @@ nav button.sel svg{stroke:var(--rose)}
 .link{margin-top:10px;font-size:13px;color:var(--soft);text-decoration:underline;text-underline-offset:3px}
 .toast{position:fixed;left:50%;top:max(16px,env(safe-area-inset-top));transform:translate(-50%,calc(-100% - 60px));padding:10px 16px;border-radius:999px;font-size:14px;z-index:6;transition:transform .3s cubic-bezier(.3,1.4,.6,1)}
 .toast.on{transform:translate(-50%,0)}
+.brand{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.brand b{font-size:20px;letter-spacing:-.4px}
+.with{font-size:12px;color:var(--cocoa);background:var(--pink);padding:3px 9px;border-radius:999px}
+svg.bunny{width:30px;height:30px;stroke:none}
+.qa .ic svg.bunny{width:36px;height:36px}
+.hello h1{font:600 30px/1.1 var(--sans)!important;letter-spacing:-.6px}
+.hot{background:var(--rose)!important;color:#fff!important;border-color:var(--rose)!important;box-shadow:0 8px 20px var(--glow)}
+.hot .ic{background:rgba(255,255,255,.25)!important}
+.dpad .ok{background:var(--rose)!important;box-shadow:0 10px 24px var(--glow)!important;text-shadow:none!important}
+nav button.sel svg{stroke:var(--rose)}
 </style>
 </head>
 <body>
-<div class="orbs"><i></i><i></i><i></i></div>
+<div class="orbs"></div>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <filter id="pinkify" color-interpolation-filters="sRGB">
@@ -193,22 +196,40 @@ nav button.sel svg{stroke:var(--rose)}
   <symbol id="i-touch" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="4"/><circle cx="12" cy="12" r="2.5"/></symbol>
   <symbol id="i-type" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="3"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></symbol>
   <symbol id="i-bs" viewBox="0 0 24 24"><path d="M21 5H9l-6 7 6 7h12a1 1 0 001-1V6a1 1 0 00-1-1z"/><path d="M17 9l-5 6M12 9l5 6"/></symbol>
+  <symbol id="grace" viewBox="0 0 100 100">
+    <g stroke="none">
+      <ellipse cx="37" cy="30" rx="9" ry="20" fill="#F59BBF" transform="rotate(-14 37 40)"/>
+      <ellipse cx="37" cy="31" rx="4.5" ry="14" fill="#FFE3EE" transform="rotate(-14 37 40)"/>
+      <ellipse cx="63" cy="30" rx="9" ry="20" fill="#F59BBF" transform="rotate(32 63 44)"/>
+      <ellipse cx="63" cy="31" rx="4.5" ry="14" fill="#FFE3EE" transform="rotate(32 63 44)"/>
+      <circle cx="50" cy="60" r="34" fill="#FFC6DC"/>
+      <circle cx="40" cy="48" r="18" fill="#FFE5F0" opacity=".6"/>
+      <path d="M28 33 L18 29 L18 39Z M28 33 L38 29 L38 39Z" fill="#EC6AA0"/><circle cx="28" cy="33" r="3" fill="#FFE3EE"/>
+      <ellipse cx="39" cy="61" rx="5" ry="6.5" fill="#4A2335"/><ellipse cx="61" cy="61" rx="5" ry="6.5" fill="#4A2335"/>
+      <circle cx="37.5" cy="58.5" r="2.2" fill="#fff"/><circle cx="59.5" cy="58.5" r="2.2" fill="#fff"/>
+      <ellipse cx="29" cy="69" rx="5" ry="2.7" fill="#FF7FAE" opacity=".45"/><ellipse cx="71" cy="69" rx="5" ry="2.7" fill="#FF7FAE" opacity=".45"/>
+    </g>
+    <path d="M44.5 70 q2.75 3 5.5 0 q2.75 3 5.5 0" stroke="#4A2335" stroke-width="1.9" fill="none" stroke-linecap="round"/>
+  </symbol>
   <symbol id="i-send" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
 </svg>
 
 <main>
   <header>
-    <div class="hello"><small id="when">Glass TV</small><h1 id="greet">Hello</h1></div>
+    <div class="hello">
+      <div class="brand"><svg class="bunny" viewBox="0 0 100 100" aria-hidden="true"><use href="#grace"/></svg><b>anna</b><span class="with">with Grace</span></div>
+      <h1 id="greet">Hello</h1><small id="when">Glass TV</small>
+    </div>
     <div class="pill glass"><span class="dot" id="dot"></span><span id="st">Connecting…</span></div>
   </header>
 
   <!-- REMOTE -->
   <section class="pane on" id="remote">
     <div class="qas" style="grid-template-columns:repeat(5,1fr)">
-      <button class="qa glass" data-a="assistant"><span class="ic orb-ic"></span>Grace</button>
+      <button class="qa glass" data-a="assistant"><span class="ic"><svg class="bunny" viewBox="0 0 100 100"><use href="#grace"/></svg></span>Grace</button>
       <button class="qa glass" data-a="home"><span class="ic"><svg><use href="#i-home"/></svg></span>Home</button>
       <button class="qa glass" data-a="ambient"><span class="ic"><svg><use href="#i-moon"/></svg></span>Ambient</button>
-      <button class="qa glass" data-a="datenight"><span class="ic">💕</span>Date Night</button>
+      <button class="qa glass hot" data-a="datenight"><span class="ic">💕</span>Date Night</button>
       <button class="qa glass" data-a="settings"><span class="ic"><svg><use href="#i-gear"/></svg></span>Settings</button>
     </div>
     <div class="dpad glass">
@@ -262,6 +283,7 @@ nav button.sel svg{stroke:var(--rose)}
     <p class="hint">Types into the focused box on the TV, or asks Grace if none is focused.</p>
     <h2>Ask Grace</h2>
     <div class="chips">
+      <button class="chip glass hot" data-a="datenight">💕 Date Night</button>
       <button class="chip glass" data-say="What should we watch tonight? Suggest 4 options across moods.">🍿 What should we watch?</button>
       <button class="chip glass" data-fill="Recap the latest season of ">📺 Recap a show</button>
       <button class="chip glass" data-fill="Who's in the cast of ">🎭 Who's in this?</button>
@@ -300,7 +322,7 @@ nav button.sel svg{stroke:var(--rose)}
 
   // Greeting
   const h = new Date().getHours();
-  $('#greet').textContent = h < 5 ? 'Good night' : h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : h < 22 ? 'Good evening' : 'Good night';
+  $('#greet').textContent = h < 5 ? 'Good night' : h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : h < 22 ? 'Good evening' : 'Good night'; $('#greet').textContent += ', Anna ♡';
   $('#when').textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
 
   function connect() {
