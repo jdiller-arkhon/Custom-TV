@@ -95,7 +95,7 @@ class HomeServices(private val app: GlassApp) {
     }
 
     private fun fmt(d: Duration) = when {
-        d.toHours() >= 1 && d.toMinutesPart() == 0 -> "${d.toHours()} hour${if (d.toHours() > 1) "s" else ""}"
+        d.toHours() >= 1 && d.toMinutes() % 60 == 0L -> "${d.toHours()} hour${if (d.toHours() > 1) "s" else ""}"
         d.toMinutes() >= 1 -> "${d.toMinutes()} min"
         else -> "${d.seconds} sec"
     }
