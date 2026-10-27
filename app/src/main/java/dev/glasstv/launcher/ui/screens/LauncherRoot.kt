@@ -125,6 +125,10 @@ fun LauncherRoot(app: GlassApp, ui: LauncherUi) {
             val anyOverlay = ui.aiOpen || ui.settingsOpen || ui.qrOpen
             HomeScreen(app, ui, settings, now, Modifier.fillMaxSize(), interactive = !anyOverlay && !ui.ambient)
 
+            // Scrim: soften the home screen behind the assistant so the sheet reads clearly.
+            AnimatedVisibility(ui.aiOpen && !ui.ambient, enter = fadeIn(), exit = fadeOut()) {
+                Box(Modifier.fillMaxSize().background(LocalGlass.current.background.copy(alpha = 0.55f)))
+            }
             AnimatedVisibility(
                 ui.aiOpen && !ui.ambient,
                 enter = slideInHorizontally { it } + fadeIn(),
@@ -303,8 +307,8 @@ private fun AppTile(app: GlassApp, tvApp: TvApp, modifier: Modifier, onLongClick
                 a.image, tvApp.label, Modifier.fillMaxSize().padding(6.dp).clip(RoundedCornerShape(16.dp)), contentScale = ContentScale.Crop,
             )
             else -> Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                if (a != null) Image(a.image, null, Modifier.size(56.dp))
-                Spacer(Modifier.height(8.dp))
+                if (a != null) Image(a.image, null, Modifier.size(42.dp).clip(RoundedCornerShape(10.dp)))
+                Spacer(Modifier.height(6.dp))
                 GlassText(tvApp.label, GlassType.label, Modifier.padding(horizontal = 10.dp), maxLines = 1)
             }
         }
@@ -315,7 +319,7 @@ private fun AppTile(app: GlassApp, tvApp: TvApp, modifier: Modifier, onLongClick
 private fun Dock(ui: LauncherUi, modifier: Modifier) {
     val c = LocalGlass.current
     Row(
-        modifier.glassPanel(RoundedCornerShape(40.dp)).padding(horizontal = 22.dp, vertical = 12.dp),
+        modifier.glassPanel(RoundedCornerShape(40.dp), elevation = 8.dp).padding(horizontal = 22.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(18.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -389,7 +393,9 @@ fun RemoteQrSheet(onClose: () -> Unit) {
 @Composable
 private fun AmbientScreen(now: LocalDateTime, settings: Settings) {
     val c = LocalGlass.current
-    Box(Modifier.fillMaxSize().background(c.background.copy(alpha = 0.25f)), contentAlignment = Alignment.Center) {
+    // Ambient fully replaces the home screen: its own orbs, then the clock.
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        OrbBackground(settings.reduceMotion, settings.extraBlur)
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             GlassText(now.format(DateTimeFormatter.ofPattern("h:mm")), GlassType.ambientClock, maxLines = 1)
             GlassText(

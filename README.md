@@ -20,6 +20,18 @@ Then:
 
 Every system-level change and its exact undo: **[docs/recovery.md](docs/recovery.md)**.
 
+## Screens
+
+Rendered from the real launcher code at 1920×1080. App icons here are Robolectric placeholders; on the TV each tile uses the app's own banner or icon.
+
+| Home | Assistant |
+|---|---|
+| ![Home](docs/screens/tv-home-light.png) | ![Assistant](docs/screens/tv-assistant-light.png) |
+| **Home (dark)** | **Ambient** |
+| ![Home dark](docs/screens/tv-home-dark.png) | ![Ambient](docs/screens/tv-ambient-dark.png) |
+
+Regenerate: `./gradlew :app:testDebugUnitTest -PtvScreens --tests '*TvScreensTest*'` (writes `docs/screens/`).
+
 ## Features (v1)
 
 | | |

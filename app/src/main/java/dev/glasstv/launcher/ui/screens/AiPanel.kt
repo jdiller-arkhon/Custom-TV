@@ -78,7 +78,7 @@ fun AiPanel(app: GlassApp, onClose: () -> Unit) {
             .width(560.dp)
             .padding(top = 24.dp, bottom = 24.dp, end = 24.dp)
             .glassPanel(RoundedCornerShape(36.dp), 28.dp)
-            .background(c.glassFill) // a second wash: the sheet reads as one solid pane of glass over the grid
+            .background(c.background.copy(alpha = 0.72f)) // frosted, near-opaque: text must read cleanly over the grid
             .padding(28.dp)
             .focusProperties { onExit = { cancelFocusChange() } }
             .focusGroup(),

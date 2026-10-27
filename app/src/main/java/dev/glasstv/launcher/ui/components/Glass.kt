@@ -93,7 +93,8 @@ fun GlassButton(
             pressedGlow = Glow(c.rose, 14.dp),
         ),
     ) {
-        Box(contentAlignment = Alignment.Center, content = content)
+        // Centre content in the surface (the surface's own box is top-start aligned).
+        Box(Modifier.align(Alignment.Center), contentAlignment = Alignment.Center, content = content)
     }
 }
 

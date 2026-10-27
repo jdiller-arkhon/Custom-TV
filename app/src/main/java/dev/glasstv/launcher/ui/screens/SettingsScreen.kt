@@ -70,12 +70,13 @@ fun SettingsScreen(app: GlassApp, s: Settings, onClose: () -> Unit, onShowQr: ()
     BackHandler(onBack = onClose)
     LaunchedEffect(Unit) { runCatching { first.requestFocus() } }
 
-    Box(Modifier.fillMaxSize().background(c.background.copy(alpha = 0.45f)), contentAlignment = Alignment.Center) {
+    Box(Modifier.fillMaxSize().background(c.background.copy(alpha = 0.6f)), contentAlignment = Alignment.Center) {
         LazyColumn(
             Modifier
                 .fillMaxSize()
                 .padding(horizontal = 120.dp, vertical = 32.dp)
                 .glassPanel(RoundedCornerShape(36.dp), 28.dp)
+                .background(c.background.copy(alpha = 0.75f))
                 .focusProperties { onExit = { cancelFocusChange() } }
                 .focusGroup(),
             contentPadding = PaddingValues(horizontal = 44.dp, vertical = 36.dp),
