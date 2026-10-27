@@ -23,6 +23,8 @@ data class GlassColors(
     /** Dark-brown accent: ink, latte orb, deep ends of gradients. */
     val cocoa: Color,
     val latte: Color,
+    /** Champagne gold: hairlines, monogram, signature. */
+    val gold: Color,
     val text: Color,
     val textSoft: Color,
     val glassFill: Color,
@@ -42,6 +44,7 @@ val LightColors = GlassColors(
     peach = Color(0xFFFFD3C4),
     cocoa = Color(0xFF4A2C24),
     latte = Color(0xFFDDB8A4),
+    gold = Color(0xFFC9A36A),
     text = Color(0xFF3E2420),
     textSoft = Color(0xFF3E2420).copy(alpha = 0.66f),
     glassFill = Color(0xFFFFF4F6),        // solid cream-blush card
@@ -61,6 +64,7 @@ val DarkColors = GlassColors(
     peach = Color(0xFFF2A58E),
     cocoa = Color(0xFF5C3A2E),
     latte = Color(0xFF8A5A44),
+    gold = Color(0xFFE2C58F),
     text = Color(0xFFFCEAF1),
     textSoft = Color(0xFFFCEAF1).copy(alpha = 0.66f),
     glassFill = Color(0xFF34222A),        // solid cocoa-plum card
@@ -75,6 +79,7 @@ val Fraunces = FontFamily(
     Font(R.font.fraunces_300, FontWeight.Light),
     Font(R.font.fraunces_400, FontWeight.Normal),
     Font(R.font.fraunces_600, FontWeight.SemiBold),
+    Font(R.font.fraunces_italic_400, FontWeight.Normal, androidx.compose.ui.text.font.FontStyle.Italic),
 )
 
 val Figtree = FontFamily(

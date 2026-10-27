@@ -94,6 +94,15 @@ fun OrbBackground(reduceMotion: Boolean, extraBlur: Boolean, modifier: Modifier 
                 radius = radius, center = center,
             )
         }
+        // Floating hearts drifting upward, each on its own lane and pace.
+        for (i in 0 until 9) {
+            val lane = (i * 0.113f + 0.05f) % 1f
+            val prog = if (reduceMotion) (i / 9f) else ((time * (2 + i % 3) + i * 0.137f) % 1f)
+            val hx = lane * size.width + sin((prog * 6f + i).toDouble()).toFloat() * dim * 0.012f
+            val hy = size.height * (1.05f - prog * 1.15f)
+            val ha = (sin(prog * PI.toFloat())).coerceAtLeast(0f) * (if (c.isDark) 0.35f else 0.45f)
+            drawHeart(Offset(hx, hy), dim * (0.010f + (i % 3) * 0.004f), c.rose.copy(alpha = ha))
+        }
         // Tiny twinkling sparkles: soft four-point stars, each pulsing on its own phase.
         sparkles.forEach { s ->
             val tw = if (reduceMotion) 0.7f else 0.35f + 0.65f * (0.5f + 0.5f * sin(2f * PI.toFloat() * (time * s.speed + s.phase)))

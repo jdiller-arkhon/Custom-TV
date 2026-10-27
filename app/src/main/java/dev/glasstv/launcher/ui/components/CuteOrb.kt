@@ -16,7 +16,7 @@ import dev.glasstv.launcher.ui.theme.LocalGlass
 
 /** The assistant's face: a glossy pink orb with sleepy happy eyes and blush cheeks. */
 @Composable
-fun CuteOrb(size: Dp, modifier: Modifier = Modifier) {
+fun CuteOrb(size: Dp, modifier: Modifier = Modifier, eyesOpen: Float = 1f) {
     val c = LocalGlass.current
     Canvas(modifier.size(size)) {
         val r = this.size.minDimension / 2
@@ -28,9 +28,10 @@ fun CuteOrb(size: Dp, modifier: Modifier = Modifier) {
         val eyeY = r * 1.02f
         val ink = c.cocoa
         val w = r * 0.09f
-        // ^ ^ closed happy eyes (arcs)
+        // ^ ^ happy eyes (arcs); a blink flattens them
         listOf(r * 0.66f, r * 1.34f).forEach { x ->
-            drawArc(ink, 200f, 140f, false, Offset(x - r * 0.16f, eyeY - r * 0.12f), Size(r * 0.32f, r * 0.26f), style = Stroke(w, cap = StrokeCap.Round))
+            val eh = r * 0.26f * eyesOpen.coerceIn(0.08f, 1f)
+            drawArc(ink, 200f, 140f, false, Offset(x - r * 0.16f, eyeY - eh / 2), Size(r * 0.32f, eh), style = Stroke(w, cap = StrokeCap.Round))
         }
         // blush
         listOf(r * 0.48f, r * 1.52f).forEach { x ->

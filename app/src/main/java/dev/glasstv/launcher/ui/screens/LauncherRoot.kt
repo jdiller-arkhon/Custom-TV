@@ -58,6 +58,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.glasstv.launcher.GlassApp
 import dev.glasstv.launcher.Idle
@@ -166,6 +167,13 @@ fun LauncherRoot(app: GlassApp, ui: LauncherUi) {
 
             PairingCodeToast(Modifier.align(Alignment.TopCenter).padding(top = 32.dp))
 
+            // Welcome moment: hearts + the love note each time Anna comes home.
+            var burst by remember { mutableStateOf(0) }
+            LaunchedEffect(ui.homeTick, settings.reduceMotion) { if (!settings.reduceMotion) burst++ }
+            if (burst > 0 && !ui.ambient) {
+                key(burst) { dev.glasstv.launcher.ui.components.HeartBurst(onDone = { burst = 0 }) }
+            }
+
             AnimatedVisibility(ui.ambient, enter = fadeIn(), exit = fadeOut()) {
                 AmbientScreen(now, settings)
             }
@@ -228,6 +236,18 @@ private fun HomeScreen(
         else { ui.aiOpen = true; app.assistant.send(text); query = "" }
     }
 
+    // Intro choreography, replayed whenever Anna comes home: nook slides in, stage unfolds, bubbles pop.
+    val motion = !settings.reduceMotion
+    val intro = remember { androidx.compose.animation.core.Animatable(if (motion) 0f else 1f) }
+    LaunchedEffect(ui.homeTick, motion) {
+        if (!motion) { intro.snapTo(1f); return@LaunchedEffect }
+        intro.snapTo(0f)
+        intro.animateTo(1f, androidx.compose.animation.core.tween(1300, easing = androidx.compose.animation.core.LinearEasing))
+    }
+    val p = intro.value
+    fun easeOutBack(x: Float): Float { val c1 = 1.70158f; val c3 = c1 + 1; val y = x - 1; return 1 + c3 * y * y * y + c1 * y * y }
+    fun stage(start: Float, len: Float) = ((p - start) / len).coerceIn(0f, 1f)
+
     Row(
         modifier
             // While an overlay is up, D-pad focus can't wander back into the home screen behind it.
@@ -236,7 +256,12 @@ private fun HomeScreen(
             .padding(28.dp),
         horizontalArrangement = Arrangement.spacedBy(28.dp),
     ) {
-        GraceNook(app, ui, settings, now, query, { query = it }, ::submit, Modifier.width(300.dp).fillMaxHeight())
+        GraceNook(
+            app, ui, settings, now, query, { query = it }, ::submit,
+            Modifier.width(300.dp).fillMaxHeight().graphicsLayer {
+                val s = stage(0f, 0.45f); alpha = s; translationX = (1f - easeOutBack(s)) * -80f
+            },
+        )
 
         Column(Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState())) {
             if (query.isNotBlank()) {
@@ -246,10 +271,12 @@ private fun HomeScreen(
                     GlassType.body, Modifier.padding(8.dp), color = LocalGlass.current.textSoft,
                 ) else WaveRow(app, results, null, { spotlight = it; onAccent(it) }, ::togglePin, bubble = 104.dp)
             } else {
-                if (shown != null) Spotlight(app, shown, shown in recent.take(3))
+                if (shown != null) Box(Modifier.graphicsLayer {
+                    val s = stage(0.15f, 0.45f); alpha = s; val k = 0.9f + 0.1f * easeOutBack(s); scaleX = k; scaleY = k
+                }) { Spotlight(app, shown, shown in recent.take(3), animate = motion) }
                 Spacer(Modifier.height(18.dp))
                 SectionHeader(if (pinned.isNotEmpty()) "Your favorites ♡" else "Your apps")
-                WaveRow(app, favorites, firstFocus, { spotlight = it; onAccent(it) }, ::togglePin, bubble = 104.dp)
+                WaveRow(app, favorites, firstFocus, { spotlight = it; onAccent(it) }, ::togglePin, bubble = 104.dp, popIn = { i -> easeOutBack(stage(0.35f + i * 0.06f, 0.35f)) })
                 if (rest.isNotEmpty()) {
                     SectionHeader("Everything else")
                     rest.chunked(9).forEach { WaveRow(app, it, null, { a -> spotlight = a; onAccent(a) }, ::togglePin, bubble = 76.dp, amplitude = 0f) }
@@ -277,9 +304,13 @@ private fun GraceNook(
     val breath = if (settings.reduceMotion) 1f else androidx.compose.animation.core.rememberInfiniteTransition(label = "breath").animateFloat(
         0.96f, 1.04f, androidx.compose.animation.core.infiniteRepeatable(androidx.compose.animation.core.tween(3200), androidx.compose.animation.core.RepeatMode.Reverse), label = "b",
     ).value
-    Column(modifier.glassPanel(RoundedCornerShape(40.dp), 10.dp).padding(horizontal = 24.dp, vertical = 20.dp)) {
+    Column(
+        modifier.glassPanel(RoundedCornerShape(40.dp), 10.dp)
+            .border(1.5.dp, Brush.linearGradient(listOf(c.gold, c.gold.copy(alpha = 0.25f), c.gold)), RoundedCornerShape(40.dp))
+            .padding(horizontal = 24.dp, vertical = 20.dp)
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            dev.glasstv.launcher.ui.components.CuteOrb(60.dp, Modifier.graphicsLayer { scaleX = breath; scaleY = breath })
+            dev.glasstv.launcher.ui.components.BlinkingGrace(60.dp, !settings.reduceMotion, Modifier.graphicsLayer { scaleX = breath; scaleY = breath })
             Spacer(Modifier.width(14.dp))
             Column {
                 GlassText(now.format(DateTimeFormatter.ofPattern("h:mm")), GlassType.greeting.copy(fontSize = GlassType.greeting.fontSize * 1.25f))
@@ -294,17 +325,13 @@ private fun GraceNook(
         GlassText(settings.greetingName, GlassType.ambientClock.copy(fontSize = GlassType.clock.fontSize * 0.72f, lineHeight = GlassType.clock.fontSize * 0.8f), maxLines = 1)
         GlassText(mood, GlassType.label, color = c.textSoft)
 
-        Spacer(Modifier.height(12.dp))
-        GlassText("${dev.glasstv.launcher.Personal.ASSISTANT} suggests", GlassType.section, color = c.textSoft)
-        Spacer(Modifier.height(6.dp))
-        listOf(
-            "Movie night picks 🍿" to "What should we watch tonight? Suggest 4 options across moods.",
-            "Something funny ☺" to "Recommend 4 feel-good comedies, a mix of films and series.",
-        ).forEach { (label, prompt) ->
-            PillButton(label, { ui.aiOpen = true; app.assistant.send(prompt) }, Modifier.padding(bottom = 6.dp))
-        }
+        Spacer(Modifier.height(14.dp))
+        dev.glasstv.launcher.ui.components.LoveNote(size = 24.sp, animate = !settings.reduceMotion)
 
         Spacer(Modifier.weight(1f))
+        PillButton("Movie night picks 🍿", {
+            ui.aiOpen = true; app.assistant.send("What should we watch tonight? Suggest 4 options across moods.")
+        }, Modifier.padding(bottom = 8.dp))
         dev.glasstv.launcher.ui.components.GlassTextField(
             value = query, onCommit = onSubmit, onChange = onQuery,
             placeholder = "⌕  Ask Grace…",
@@ -322,7 +349,7 @@ private fun GraceNook(
             CircleIcon("⚙") { ui.settingsOpen = true }
             Spacer(Modifier.weight(1f))
             Box(
-                Modifier.size(48.dp).background(Brush.linearGradient(listOf(c.rose, c.cocoa)), CircleShape),
+                Modifier.size(48.dp).background(Brush.linearGradient(listOf(c.rose, c.cocoa)), CircleShape).border(2.dp, c.gold, CircleShape),
                 contentAlignment = Alignment.Center,
             ) { GlassText(settings.greetingName.take(1).uppercase(), GlassType.title, color = Color.White) }
         }
@@ -331,7 +358,7 @@ private fun GraceNook(
 
 /** The stage: big art for the focused app, its name, and a cue. Not focusable itself; OK on a bubble opens. */
 @Composable
-private fun Spotlight(app: GlassApp, tvApp: TvApp, isRecent: Boolean) {
+private fun Spotlight(app: GlassApp, tvApp: TvApp, isRecent: Boolean, animate: Boolean) {
     val c = LocalGlass.current
     var art by remember(tvApp.packageName) { mutableStateOf<AppArt?>(null) }
     LaunchedEffect(tvApp.packageName) { art = app.appRepo.art(tvApp) }
@@ -340,7 +367,8 @@ private fun Spotlight(app: GlassApp, tvApp: TvApp, isRecent: Boolean) {
         Box(
             Modifier.fillMaxWidth().height(232.dp)
                 .glassPanel(RoundedCornerShape(40.dp), 10.dp)
-                .background(Brush.linearGradient(listOf(tint.copy(alpha = 0.30f), Color.Transparent, c.pink.copy(alpha = 0.25f))))
+                .border(1.5.dp, Brush.linearGradient(listOf(c.gold, c.gold.copy(alpha = 0.2f), c.gold)), RoundedCornerShape(40.dp))
+                .background(Brush.linearGradient(listOf(tint.copy(alpha = 0.30f), Color.Transparent, c.pink.copy(alpha = 0.25f))), RoundedCornerShape(40.dp))
         ) {
             val a = art
             if (a != null && a.isBanner) {
@@ -349,9 +377,23 @@ private fun Spotlight(app: GlassApp, tvApp: TvApp, isRecent: Boolean) {
                 Image(a.image, null, Modifier.align(Alignment.CenterEnd).padding(end = 64.dp).size(150.dp).clip(RoundedCornerShape(38.dp)))
             }
             Column(Modifier.align(Alignment.CenterStart).padding(start = 34.dp).width(300.dp)) {
-                GlassText(if (isRecent) "Jump back in ✨" else "Up next", GlassType.section, color = c.textSoft)
+                GlassText((if (isRecent) "Jump back in" else "Up next").uppercase() + "  ✦", GlassType.section.copy(letterSpacing = GlassType.section.letterSpacing * 1.8f), color = c.gold)
                 Spacer(Modifier.height(6.dp))
-                GlassText(shownApp.label, GlassType.ambientClock.copy(fontSize = GlassType.clock.fontSize * 0.75f), maxLines = 2)
+                // Title with a slow champagne shimmer sweeping across it.
+                val sweep = if (!animate) 0.5f else androidx.compose.animation.core.rememberInfiniteTransition(label = "sweep").animateFloat(
+                    -0.3f, 1.3f, androidx.compose.animation.core.infiniteRepeatable(androidx.compose.animation.core.tween(3600, easing = androidx.compose.animation.core.LinearEasing)), label = "sw",
+                ).value
+                androidx.compose.foundation.text.BasicText(
+                    shownApp.label, maxLines = 2,
+                    style = GlassType.ambientClock.copy(
+                        fontSize = GlassType.clock.fontSize * 0.75f,
+                        brush = Brush.linearGradient(
+                            0f to c.text, (sweep - 0.12f).coerceIn(0f, 1f) to c.text, sweep.coerceIn(0f, 1f) to c.gold,
+                            (sweep + 0.12f).coerceIn(0f, 1f) to c.text, 1f to c.text,
+                            start = androidx.compose.ui.geometry.Offset.Zero, end = androidx.compose.ui.geometry.Offset(700f, 0f),
+                        ),
+                    ),
+                )
                 Spacer(Modifier.height(10.dp))
                 Box(Modifier.background(c.cocoa, RoundedCornerShape(50)).padding(horizontal = 18.dp, vertical = 8.dp)) {
                     GlassText("Press OK to open", GlassType.label, color = Color.White)
@@ -366,6 +408,7 @@ private fun Spotlight(app: GlassApp, tvApp: TvApp, isRecent: Boolean) {
 private fun WaveRow(
     app: GlassApp, apps: List<TvApp>, focus: FocusRequester?, onFocused: (TvApp) -> Unit,
     onLongClick: (String) -> Unit, bubble: androidx.compose.ui.unit.Dp, amplitude: Float = 14f,
+    popIn: (Int) -> Float = { 1f },
 ) {
     Row(
         Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 18.dp, vertical = 22.dp),
@@ -375,7 +418,9 @@ private fun WaveRow(
             key(a.packageName) {
                 BubbleTile(
                     app, a, bubble,
-                    Modifier.offset(y = (amplitude * kotlin.math.sin(i * 0.9f)).dp),
+                    Modifier.offset(y = (amplitude * kotlin.math.sin(i * 0.9f)).dp).graphicsLayer {
+                        val k = popIn(i); scaleX = k; scaleY = k; alpha = k.coerceIn(0f, 1f)
+                    },
                     focus = if (i == 0) focus else null,
                     onFocused = { onFocused(a) },
                     onLongClick = { onLongClick(a.packageName) },
@@ -561,6 +606,8 @@ private fun AmbientScreen(now: LocalDateTime, settings: Settings) {
                 now.format(DateTimeFormatter.ofPattern("EEEE, MMMM d")), GlassType.greeting,
                 color = c.textSoft, maxLines = 1,
             )
+            Spacer(Modifier.height(28.dp))
+            dev.glasstv.launcher.ui.components.LoveNote(size = 34.sp, animate = !settings.reduceMotion, center = true)
         }
     }
 }

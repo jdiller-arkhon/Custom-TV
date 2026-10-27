@@ -76,6 +76,14 @@ class TvScreensTest {
         shot("tv-home-light")
         // Regression guard: the home screen must open with a tile focused (D-pad users need a starting point).
         compose.onAllNodes(androidx.compose.ui.test.isFocused()).assertCountEquals(1)
+        // Mid-way through the welcome moment (hearts + intro), as it plays each time Anna comes home.
+        compose.mainClock.autoAdvance = false
+        compose.activity.runOnUiThread { compose.activity.ui.goHome() }
+        org.robolectric.shadows.ShadowLooper.idleMainLooper()
+        repeat(40) { compose.mainClock.advanceTimeByFrame() } // ~650 ms of frames
+        org.robolectric.shadows.ShadowLooper.idleMainLooper()
+        compose.onRoot().captureRoboImage("$out/tv-welcome-light.png")
+        compose.mainClock.autoAdvance = true
         compose.runOnUiThread { compose.activity.ui.aiOpen = true }
         shot("tv-assistant-light")
         compose.runOnUiThread { compose.activity.ui.aiOpen = false; compose.activity.ui.settingsOpen = true }

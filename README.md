@@ -36,7 +36,8 @@ Regenerate: `./gradlew :app:testDebugUnitTest -PtvScreens --tests '*TvScreensTes
 
 | | |
 |---|---|
-| **Home** | A cozy “room”: **Grace's nook** on the left (Grace, Anna's greeting, Grace's suggestions, the Ask-Grace/search box, controls) and a **Spotlight** stage on the right that shows whichever app is focused, while the background orbs take on that app's colour. Favorites float on a gentle wave of rounded bubble icons beneath; everything else sits in a quieter row. Solid, soft cards (no glass). |
+| **Home** | A cozy “room”: **Grace's nook** on the left (Grace, Anna's greeting, Grace's suggestions, the Ask-Grace/search box, controls) and a **Spotlight** stage on the right that shows whichever app is focused, while the background orbs take on that app's colour. Favorites float on a gentle wave of rounded bubble icons beneath; everything else sits in a quieter row. Solid, soft cards with champagne-gold hairlines. A love note from Justin (“I love you, Anna — Justin ♡”) lives in the nook and under the ambient clock. |
+| **Animations** | Welcome moment each time Anna comes home (heart burst, nook slides in, spotlight unfolds, bubbles pop in on a spring); floating hearts and sparkles; Grace breathes and blinks; gold shimmer on the spotlight title and the love note. All off with *Reduce motion*. |
 | **Apps** | All leanback apps, then phone-only launcher apps. Live updates on install/uninstall. Default favorites are whichever of Netflix, YouTube, Disney+, Max, Prime Video, Spotify, Plex and Twitch are installed. **Long-press OK** on a tile to pin or unpin it. Reorder in Settings. |
 | **Focus** | Focused tile scales 1.08× with a solid rose ring and a pink glow. |
 
