@@ -58,7 +58,7 @@ object EventParser {
         if (date == null) take(rx("""\b(?:on\s+)?tomorrow(?:\s+night)?\b""")) { r -> date = today.plusDays(1); if (r.value.contains("night", true)) defaultTime = LocalTime.of(20, 0) }
         if (date == null) take(rx("""\btonight\b""")) { date = today; defaultTime = LocalTime.of(20, 0) }
         if (date == null) take(rx("""\b(?:on\s+)?today\b""")) { date = today }
-        if (date == null) take(rx("""\bin\s+(\d+|a|one|two|three)\s+(day|days|week|weeks)\b""")) { r ->
+        if (date == null) take(rx("""\bin\s+(\d{1,4}|a|one|two|three)\s+(day|days|week|weeks)\b""")) { r ->
             val n = when (r.groupValues[1].lowercase()) { "a", "one" -> 1; "two" -> 2; "three" -> 3; else -> r.groupValues[1].toInt() }
             date = if (r.groupValues[2].startsWith("week", true)) today.plusWeeks(n.toLong()) else today.plusDays(n.toLong())
         }
@@ -90,14 +90,14 @@ object EventParser {
         take(rx("""\b(?:at\s+|@\s*)?(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)(?=\W|$)""")) { r ->
             var h = r.groupValues[1].toInt() % 12
             if (r.groupValues[3].lowercase().startsWith("p")) h += 12
-            time = LocalTime.of(h, r.groupValues[2].toIntOrNull() ?: 0)
+            time = timeOf(h, r.groupValues[2].toIntOrNull() ?: 0)
         }
         if (time == null) take(rx("""\b(?:at\s+)?(noon|midday|midnight)\b""")) { r -> time = if (r.groupValues[1].lowercase() == "midnight") LocalTime.of(23, 59) else LocalTime.NOON }
         if (time == null) take(rx("""\bat\s+(\d{1,2}):(\d{2})\b""")) { r ->
             var h = r.groupValues[1].toInt()
             if (h in 1..7) h += 12 // "at 7:30" → evening
             if (h in 8..11) ambiguous = true
-            time = LocalTime.of(h % 24, r.groupValues[2].toInt())
+            time = timeOf(h % 24, r.groupValues[2].toInt())
         }
         if (time == null) take(rx("""\bat\s+(\d{1,2})\b(?!\s*(?:st|nd|rd|th|/))""")) { r ->
             var h = r.groupValues[1].toInt()
@@ -120,6 +120,9 @@ object EventParser {
         }
         return Parsed(title, LocalDateTime.of(d, time ?: LocalTime.of(9, 0)), allDay, emojiFor(title))
     }
+
+    /** null for impossible clock times like "7:75" instead of throwing. */
+    private fun timeOf(h: Int, m: Int): LocalTime? = if (h in 0..23 && m in 0..59) LocalTime.of(h, m) else null
 
     private fun monthDay(month: Int, day: Int, year: Int?, today: LocalDate): LocalDate? {
         val d = runCatching { LocalDate.of(year ?: today.year, Month.of(month), day) }.getOrNull() ?: return null

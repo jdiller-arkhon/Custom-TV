@@ -41,10 +41,10 @@ object HomeCommands {
         rx("""\b(?:what'?s|what is|show|read)\b.*\b(?:on\s+)?(?:the|my|our)?\s*$listName(?:\s+list)?\b""").find(t)?.let { m ->
             return HomeCommand.ReadList(canonicalList(m.groupValues[1]))
         }
-        rx("""^(?:set\s+(?:a\s+)?)?sleep\s+timer\s+(?:for\s+)?(\d+)\s*(?:min|mins|minutes)?$""").matchEntire(t)?.let { m ->
+        rx("""^(?:set\s+(?:a\s+)?)?sleep\s+timer\s+(?:for\s+)?(\d{1,4})\s*(?:min|mins|minutes)?$""").matchEntire(t)?.let { m ->
             return HomeCommand.SleepTimer(m.groupValues[1].toInt())
         }
-        rx("""^(?:set\s+(?:a|an)?\s*|start\s+(?:a|an)?\s*)?(?:(.+?)\s+)?timer\s+(?:for\s+)?(\d+)\s*(min|mins|minutes|minute|m|hours?|hrs?|h|sec|secs|seconds?|s)(?:\s+(?:for|called)\s+(.+))?$""").matchEntire(t)?.let { m ->
+        rx("""^(?:set\s+(?:a|an)?\s*|start\s+(?:a|an)?\s*)?(?:(.+?)\s+)?timer\s+(?:for\s+)?(\d{1,4})\s*(min|mins|minutes|minute|m|hours?|hrs?|h|sec|secs|seconds?|s)(?:\s+(?:for|called)\s+(.+))?$""").matchEntire(t)?.let { m ->
             val n = m.groupValues[2].toLong()
             val d = when (m.groupValues[3].lowercase().first()) { 'h' -> Duration.ofHours(n); 's' -> Duration.ofSeconds(n); else -> Duration.ofMinutes(n) }
             val label = (m.groupValues[4].ifBlank { m.groupValues[1] }).trim().removePrefix("a ").ifBlank { "Timer" }

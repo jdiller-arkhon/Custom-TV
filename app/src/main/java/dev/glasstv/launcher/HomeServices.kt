@@ -88,7 +88,13 @@ class HomeServices(private val app: GlassApp) {
             }
             is HomeCommand.AddToWatchlist -> { home.addWatch(WatchItem(title = cmd.title)); "🍿 Saved ${cmd.title} to your watchlist." }
             is HomeCommand.OpenApp -> {
-                MainActivity.foreground?.ui?.let { ui -> ui.aiOpen = false; ui.openApp = BuiltInApps.fromSpoken(cmd.app) }
+                val ui = MainActivity.foreground?.ui
+                if (cmd.app == "apps") {
+                    ui?.let { it.aiOpen = false; it.openApp = null; it.appsOpen = true }
+                } else {
+                    val target = BuiltInApps.fromSpoken(cmd.app) ?: return null
+                    ui?.let { it.aiOpen = false; it.openApp = target }
+                }
                 "Opening ${cmd.app}…"
             }
         }

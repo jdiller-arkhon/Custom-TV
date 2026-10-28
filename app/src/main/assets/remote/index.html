@@ -389,7 +389,7 @@ nav button.sel svg{stroke:var(--rose)}
     if (!r) { $('#perr').textContent = "Can't reach the TV."; return; }
     const j = await r.json();
     if (j.token) { token = j.token; localStorage.setItem(KEY, token); $('#pair').classList.remove('on'); $('#code').value = ''; vib(30); toast('Paired ✓'); connect(); }
-    else { vib([20, 40, 20]); $('#perr').textContent = j.error === 'expired' ? 'That code expired. New one on the TV…' : 'Wrong code. Try again.'; $('#code').value = ''; drawDigits(); if (j.error === 'expired') startPair(); }
+    else { vib([20, 40, 20]); $('#perr').textContent = j.error === 'locked' ? 'Too many wrong codes. Try again in a few minutes.' : j.error === 'expired' ? 'That code expired. New one on the TV…' : 'Wrong code. Try again.'; $('#code').value = ''; drawDigits(); if (j.error === 'expired') startPair(); }
   }
   $('#pbtn').onclick = confirmPair;
   $('#code').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4); drawDigits(); if (e.target.value.length === 4) confirmPair(); });

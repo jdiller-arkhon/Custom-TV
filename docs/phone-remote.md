@@ -5,7 +5,7 @@ Scan the QR code on the TV (first launch, dock → *Phone remote*, or Settings).
 ## Pairing and security
 
 - A phone that isn't paired triggers a **4-digit code** on the TV. Typing it on the phone pairs it.
-- Each code lasts 2 minutes and allows 5 guesses, then it is discarded. Starting a pairing is rate-limited so nobody can spam the TV with popups.
+- Each code lasts 2 minutes and allows 5 guesses, then it is discarded. Wrong guesses also add up across codes: after 15, pairing locks for 10 minutes, so nobody on the Wi-Fi can brute-force the code by asking for fresh ones.
 - A successful pairing issues a random 256-bit token, stored in the phone's browser. The TV stores only its SHA-256 hash (DataStore). Every WebSocket message is checked against the current list, so **Settings → Phone remote → Forget** cuts a phone off immediately.
 - WebSocket connections from other origins (a random web page open on the phone) are rejected.
 - Traffic is plain HTTP on your LAN, with no TLS, because a TV can't hold a trusted certificate for a local IP. Anyone who can sniff your Wi-Fi could observe button presses and the token. That's acceptable on a WPA2/3 home network. Don't use it on public Wi-Fi.

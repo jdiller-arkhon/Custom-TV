@@ -209,7 +209,7 @@ fun LauncherRoot(app: GlassApp, ui: LauncherUi) {
                     dev.glasstv.launcher.BuiltInApp.SLEEP -> dev.glasstv.launcher.ui.apps.SleepApp(app, close)
                     dev.glasstv.launcher.BuiltInApp.GUEST_WIFI -> dev.glasstv.launcher.ui.apps.GuestWifiApp(app, close)
                     dev.glasstv.launcher.BuiltInApp.FIREPLACE -> dev.glasstv.launcher.ui.apps.FireplaceApp(settings.reduceMotion, close)
-                    dev.glasstv.launcher.BuiltInApp.GAME_NIGHT -> dev.glasstv.launcher.ui.apps.GameNightApp(close)
+                    dev.glasstv.launcher.BuiltInApp.GAME_NIGHT -> dev.glasstv.launcher.ui.apps.GameNightApp(close, settings.reduceMotion)
                     dev.glasstv.launcher.BuiltInApp.WOULD_YOU_RATHER -> dev.glasstv.launcher.ui.apps.WouldYouRatherApp(close)
                     else -> close()
                 }
@@ -721,11 +721,14 @@ private fun PairingCodeToast(modifier: Modifier) {
 fun RemoteQrSheet(onClose: () -> Unit) {
     val context = LocalContext.current
     val c = LocalGlass.current
-    val url = remember { NetworkInfo.remoteUrl(context) }
+    var liveUrl by remember { mutableStateOf(NetworkInfo.remoteUrl(context)) }
+    // Offline: keep checking, so connecting via "Connect to Wi-Fi" (or plugging in Ethernet) shows the QR on return.
+    LaunchedEffect(liveUrl == null) { while (liveUrl == null) { delay(2_000); liveUrl = NetworkInfo.remoteUrl(context) } }
+    val url = liveUrl
     val connected by RemoteBus.connectedPhones.collectAsState()
     val close = remember { FocusRequester() }
     BackHandler(onBack = onClose)
-    LaunchedEffect(Unit) { runCatching { close.requestFocus() } }
+    LaunchedEffect(url != null) { runCatching { close.requestFocus() } }
     Box(Modifier.fillMaxSize().background(c.background.copy(alpha = 0.55f)), contentAlignment = Alignment.Center) {
         GlassPanel(
             Modifier.focusProperties { onExit = { cancelFocusChange() } }.focusGroup(),
@@ -749,7 +752,6 @@ fun RemoteQrSheet(onClose: () -> Unit) {
                         GlassText("● $connected phone${if (connected == 1) "" else "s"} connected", GlassType.label, color = c.rose)
                     }
                     Spacer(Modifier.height(24.dp))
-                    val context = androidx.compose.ui.platform.LocalContext.current
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         // Offline: Wi-Fi is the obvious next step, so it gets focus and the pink fill.
                         if (url == null) PillButton("Connect to Wi-Fi", { dev.glasstv.launcher.SystemSettings.openWifi(context) }, Modifier.focusRequester(close), selected = true)

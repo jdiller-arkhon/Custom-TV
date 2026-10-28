@@ -50,15 +50,16 @@ class CalendarStore(context: Context, private val scope: CoroutineScope) {
     private fun update(f: (List<CalEvent>) -> List<CalEvent>) {
         val next = f(_events.value)
         _events.value = next
-        scope.launch(Dispatchers.IO) { save(next) }
+        scope.launch(Dispatchers.IO) { save() }
     }
 
     private fun load(): List<CalEvent> = runCatching { decode(file.readText()) }.getOrDefault(emptyList())
 
-    @Synchronized private fun save(list: List<CalEvent>) {
+    /** Writes the current list (read under the lock), so the last save to run always persists the newest data. */
+    @Synchronized private fun save() {
         // Write-then-rename so a power cut never leaves a half-written file.
         val tmp = File(file.parentFile, "events.json.tmp")
-        tmp.writeText(encode(list)); tmp.renameTo(file)
+        tmp.writeText(encode(_events.value)); tmp.renameTo(file)
     }
 
     companion object {

@@ -318,7 +318,7 @@ fun GuestWifiApp(app: GlassApp, onClose: () -> Unit) {
     var ssid by remember(state.wifiSsid) { mutableStateOf(state.wifiSsid) }
     var pass by remember(state.wifiPassword) { mutableStateOf(state.wifiPassword) }
     val first = rememberInitialFocus()
-    fun esc(s: String) = s.replace(Regex("""([\;,:"])"""), "\\\\$1")
+    fun esc(s: String) = s.replace(Regex("""([\\;,:"])"""), "\\\\$1")
     AppSheet("📶", "Guest Wi-Fi", "Guests scan with their phone camera to join", onClose) {
         Row(horizontalArrangement = Arrangement.spacedBy(36.dp)) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {

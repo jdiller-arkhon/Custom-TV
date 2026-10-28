@@ -46,9 +46,7 @@ class Assistant(
         val prompt = text.trim()
         if (prompt.isEmpty()) return
         (homeHandler?.invoke(prompt) ?: calendarReply(prompt))?.let { reply ->
-            _state.value = _state.value.copy(
-                messages = _state.value.messages + ChatMessage("user", prompt) + ChatMessage("assistant", reply), error = null,
-            )
+            appendLocal(prompt, reply)
             return
         }
         LocalCommands.parse(prompt, apps())?.let { cmd ->
@@ -60,10 +58,7 @@ class Assistant(
                 LocalCommand.OpenCalendar -> "Opening your calendar…"
                 is LocalCommand.EventAdded -> "Added ${cmd.event.title}."
             }
-            _state.value = _state.value.copy(
-                messages = _state.value.messages + ChatMessage("user", prompt) + ChatMessage("assistant", reply),
-                error = null,
-            )
+            appendLocal(prompt, reply)
             onCommand(cmd)
             return
         }
@@ -88,6 +83,15 @@ class Assistant(
                 _state.value = AssistantState(history, false, AssistantUnavailable("Something went wrong", e.message ?: ""))
             }
         }
+    }
+
+    /** Adds an on-device exchange. A model reply still streaming would overwrite it, so that stream is stopped. */
+    private fun appendLocal(prompt: String, reply: String) {
+        job?.cancel()
+        _state.value = _state.value.copy(
+            messages = _state.value.messages + ChatMessage("user", prompt) + ChatMessage("assistant", reply),
+            streaming = false, error = null,
+        )
     }
 
     /** Calendar requests are handled on the TV (no PC needed): add events, or read the schedule back. */

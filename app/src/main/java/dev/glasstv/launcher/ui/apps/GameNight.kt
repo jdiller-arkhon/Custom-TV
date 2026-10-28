@@ -56,14 +56,14 @@ private enum class Game(val title: String, val emoji: String, val blurb: String)
 
 /** Board games for two on the couch, or against Grace. */
 @Composable
-fun GameNightApp(onClose: () -> Unit) {
+fun GameNightApp(onClose: () -> Unit, reduceMotion: Boolean = false) {
     var game by remember { mutableStateOf<Game?>(null) }
     var vsGrace by remember { mutableStateOf(true) }
     val g = game
     AppSheet(g?.emoji ?: "🎲", g?.title ?: "Game Night", if (g == null) "Pick a game · play each other or Grace" else "Back to games: press Back", onClose = { if (g != null) game = null else onClose() }) {
         androidx.compose.animation.AnimatedContent(
             g, Modifier.fillMaxWidth().weight(1f),
-            transitionSpec = { dev.glasstv.launcher.ui.components.Motion.forward(false, deeper = targetState != null) }, label = "game",
+            transitionSpec = { dev.glasstv.launcher.ui.components.Motion.forward(reduceMotion, deeper = targetState != null) }, label = "game",
         ) { gm -> Column(Modifier.fillMaxSize()) { when (gm) {
             null -> GamePicker(vsGrace, { vsGrace = it }) { game = it }
             Game.TIC_TAC_TOE -> TicTacToeBoard(vsGrace)
@@ -310,7 +310,12 @@ private fun ColumnScope.MemoryBoard(vsGrace: Boolean) {
     val turn = run { tick; game.turn }
     val done = run { tick; game.done() }
 
-    fun flip(i: Int) { if (!looking && game.flip(i)) looking = true; seen[i] = game.cards[i]; tick++ }
+    fun flip(i: Int) {
+        if (looking) return
+        if (game.flip(i)) looking = true
+        if (i in game.up) seen[i] = game.cards[i] // only cards that were actually turned over
+        tick++
+    }
 
     LaunchedEffect(looking) { if (looking) { delay(1100); game.settle(); looking = false; tick++ } }
     LaunchedEffect(tick, round) {

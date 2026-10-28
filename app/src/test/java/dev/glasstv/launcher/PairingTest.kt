@@ -42,4 +42,14 @@ class PairingTest {
         assertEquals(64, Pairing.hash(a).length)
         assertNotEquals(a, Pairing.hash(a))
     }
+
+    @Test fun wrongGuessesAcrossFreshCodesLockPairing() {
+        val q = Pairing(clock = { now }, maxAttempts = 5, maxFailures = 15, lockoutMs = 600_000)
+        repeat(3) { q.start(); repeat(5) { q.confirm("xxxx") } }
+        assertTrue(q.lockedOut())
+        val code = q.start()
+        assertEquals(Pairing.Result.LockedOut, q.confirm(code))
+        now += 600_000
+        assertTrue(q.confirm(q.start()) is Pairing.Result.Paired)
+    }
 }

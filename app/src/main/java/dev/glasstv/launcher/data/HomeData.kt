@@ -42,7 +42,7 @@ class HomeStore(context: Context, private val scope: CoroutineScope) {
     fun update(f: (HomeState) -> HomeState) {
         val next = f(_state.value)
         _state.value = next
-        scope.launch(Dispatchers.IO) { save(next) }
+        scope.launch(Dispatchers.IO) { save() }
     }
 
     // Convenience operations used by Grace and the app screens.
@@ -59,9 +59,10 @@ class HomeStore(context: Context, private val scope: CoroutineScope) {
     fun addNote(n: LoveNote) = update { s -> s.copy(notes = (listOf(n) + s.notes).take(50)) }
     fun setWifi(ssid: String, pass: String) = update { it.copy(wifiSsid = ssid.trim(), wifiPassword = pass) }
 
-    @Synchronized private fun save(s: HomeState) {
+    /** Writes the current state (read under the lock), so the last save to run always persists the newest data. */
+    @Synchronized private fun save() {
         val tmp = File(file.parentFile, "home.json.tmp")
-        tmp.writeText(encode(s)); tmp.renameTo(file)
+        tmp.writeText(encode(_state.value)); tmp.renameTo(file)
     }
 
     companion object {

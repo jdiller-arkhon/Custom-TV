@@ -68,4 +68,10 @@ class EventParserTest {
         val list = listOf(CalEvent(title = "A", start = now, allDay = false, emoji = "🎬"), CalEvent(title = "B", start = now.plusDays(1), allDay = true))
         assertEquals(list, CalendarStore.decode(CalendarStore.encode(list)))
     }
+
+    @Test fun impossibleTimesDoNotCrash() {
+        val now = java.time.LocalDateTime.of(2026, 10, 28, 12, 0)
+        for (t in listOf("add dinner at 7:75", "remind me at 9:61pm", "add trip in 99999999999 days", "add lunch at 25:00"))
+            dev.glasstv.launcher.ai.EventParser.parse(t, now)
+    }
 }

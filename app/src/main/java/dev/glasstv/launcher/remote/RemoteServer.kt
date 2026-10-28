@@ -13,7 +13,10 @@ import fi.iki.elonen.NanoWSD.WebSocketFrame
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import org.json.JSONObject
 import java.io.IOException
 import java.security.MessageDigest
@@ -62,6 +65,7 @@ class RemoteServer(
     }
 
     private fun startPairing(): Response {
+        if (pairing.lockedOut()) return json(Response.Status.FORBIDDEN, JSONObject().put("error", "locked"))
         val now = System.currentTimeMillis()
         // Throttle so nobody can spam the TV with pairing popups.
         if (now - lastPairStart.get() < 3000 && pairing.activeCode() != null) {
@@ -84,12 +88,21 @@ class RemoteServer(
             is Pairing.Result.Paired -> {
                 RemoteBus.showPairingCode(null)
                 val id = UUID.randomUUID().toString()
-                scope.launch { settingsRepo.addPhone(PairedPhone(id, name, Pairing.hash(r.token), System.currentTimeMillis())) }
+                // The phone authenticates the moment it gets the token, so the pairing must be saved and visible
+                // to isAuthorized() first. (This runs on a NanoHTTPD worker thread, not the main thread.)
+                runBlocking {
+                    settingsRepo.addPhone(PairedPhone(id, name, Pairing.hash(r.token), System.currentTimeMillis()))
+                    withTimeoutOrNull(3_000) { pairedPhones.first { list -> list.any { it.id == id } } }
+                }
                 json(Response.Status.OK, JSONObject().put("token", r.token).put("id", id))
             }
             Pairing.Result.WrongCode -> {
                 if (pairing.activeCode() == null) RemoteBus.showPairingCode(null)
                 json(Response.Status.FORBIDDEN, JSONObject().put("error", "wrong_code"))
+            }
+            Pairing.Result.LockedOut -> {
+                RemoteBus.showPairingCode(null)
+                json(Response.Status.FORBIDDEN, JSONObject().put("error", "locked"))
             }
             Pairing.Result.NoActiveCode -> {
                 RemoteBus.showPairingCode(null)
