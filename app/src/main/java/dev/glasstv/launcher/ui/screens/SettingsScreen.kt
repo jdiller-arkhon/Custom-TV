@@ -133,6 +133,7 @@ fun SettingsScreen(app: GlassApp, s: Settings, onClose: () -> Unit, onShowQr: ()
             section("SYSTEM")
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    PillButton("Wi-Fi", { dev.glasstv.launcher.SystemSettings.openWifi(context) })
                     PillButton("Android TV settings", {
                         runCatching { context.startActivity(Intent(android.provider.Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
                     })

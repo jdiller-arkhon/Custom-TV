@@ -749,7 +749,13 @@ fun RemoteQrSheet(onClose: () -> Unit) {
                         GlassText("● $connected phone${if (connected == 1) "" else "s"} connected", GlassType.label, color = c.rose)
                     }
                     Spacer(Modifier.height(24.dp))
-                    PillButton("Done", onClose, Modifier.focusRequester(close))
+                    val context = androidx.compose.ui.platform.LocalContext.current
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        // Offline: Wi-Fi is the obvious next step, so it gets focus and the pink fill.
+                        if (url == null) PillButton("Connect to Wi-Fi", { dev.glasstv.launcher.SystemSettings.openWifi(context) }, Modifier.focusRequester(close), selected = true)
+                        PillButton("Done", onClose, if (url == null) Modifier else Modifier.focusRequester(close))
+                        if (url != null) PillButton("Wi-Fi settings", { dev.glasstv.launcher.SystemSettings.openWifi(context) })
+                    }
                 }
             }
         }
