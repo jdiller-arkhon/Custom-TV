@@ -32,6 +32,9 @@ data class GlassColors(
     val highlightTop: Color,
     val highlightBottom: Color,
     val shadow: Color,
+    /** Home panel gradient (the soft-pink "screen"). */
+    val panelTop: Color = Color(0xFFFFF1F6),
+    val panelBottom: Color = Color(0xFFFCE1EC),
     val orbAlpha: Float,
 )
 
@@ -72,6 +75,8 @@ val DarkColors = GlassColors(
     highlightTop = Color(0xFF34262D),
     highlightBottom = Color(0xFF34262D),
     shadow = Color(0xFFF27AAE).copy(alpha = 0.20f),
+    panelTop = Color(0xFF2A1D24),
+    panelBottom = Color(0xFF221820),
     orbAlpha = 0f,
 )
 
