@@ -30,7 +30,7 @@ data class TvApp(
 
 /** Real, system-provided artwork: the app's TV banner if it ships one, otherwise its launcher icon. */
 /** [tint] is the art's average colour, used to mood-light the room when the app is focused. */
-data class AppArt(val image: ImageBitmap, val isBanner: Boolean, val tint: Int = 0)
+data class AppArt(val image: ImageBitmap, val isBanner: Boolean, val tint: Int = 0, val edge: Int = 0)
 
 class AppRepository(private val context: Context, private val scope: CoroutineScope) {
     private val pm = context.packageManager
@@ -93,7 +93,7 @@ class AppRepository(private val context: Context, private val scope: CoroutineSc
                 val art = if (banner != null) {
                     banner.toBitmap(320, 180).let { AppArt(it.asImageBitmap(), true, averageColor(it)) }
                 } else {
-                    pm.getActivityIcon(app.component).toBitmap(192, 192).let { AppArt(it.asImageBitmap(), false, averageColor(it)) }
+                    pm.getActivityIcon(app.component).toBitmap(192, 192).let { AppArt(it.asImageBitmap(), false, averageColor(it), edgeColor(it)) }
                 }
                 artCache.put(app.packageName, art)
                 art
@@ -143,6 +143,17 @@ class AppRepository(private val context: Context, private val scope: CoroutineSc
             listOf("tv.twitch.android.viewer", "tv.twitch.android.app"),
         )
     }
+}
+
+/** The icon's own background colour (sampled just inside its corners), so a card can extend it seamlessly. */
+private fun edgeColor(b: Bitmap): Int {
+    val w = b.width; val h = b.height
+    // Sample ~12% in from each corner (past any rounded-corner transparency).
+    val pts = listOf(w / 8 to h / 2, w * 7 / 8 to h / 2, w / 2 to h / 8, w / 2 to h * 7 / 8, w / 8 to h / 8, w * 7 / 8 to h * 7 / 8)
+    val px = pts.map { (x, y) -> b.getPixel(x.coerceIn(0, w - 1), y.coerceIn(0, h - 1)) }.filter { (it ushr 24) > 200 }
+    if (px.isEmpty()) return 0
+    // Most common sample wins (the background), not the average (which would mix in the logo).
+    return px.groupingBy { it and 0xF0F0F0 }.eachCount().maxBy { it.value }.key.let { key -> px.first { (it and 0xF0F0F0) == key } }
 }
 
 /** Average of opaque, non-near-white/black pixels: the colour people perceive as the brand colour. */

@@ -455,7 +455,7 @@ private fun AppFeatureCard(app: GlassApp, tvApp: TvApp, modifier: Modifier, onFo
     val c = LocalGlass.current
     var art by remember(tvApp.packageName) { mutableStateOf<AppArt?>(null) }
     LaunchedEffect(tvApp.packageName) { art = app.appRepo.art(tvApp) }
-    val tint = art?.tint?.takeIf { it != 0 }?.let { Color(it) } ?: c.rose
+    val bg = art?.edge?.takeIf { it != 0 }?.let { Color(it) } ?: art?.tint?.takeIf { it != 0 }?.let { Color(it) } ?: c.rose
     val shape = RoundedCornerShape(22.dp)
     androidx.tv.material3.Surface(
         onClick = { app.appRepo.launch(tvApp) },
@@ -469,13 +469,19 @@ private fun AppFeatureCard(app: GlassApp, tvApp: TvApp, modifier: Modifier, onFo
         scale = androidx.tv.material3.ClickableSurfaceDefaults.scale(focusedScale = 1.04f),
         glow = androidx.tv.material3.ClickableSurfaceDefaults.glow(androidx.tv.material3.Glow.None, androidx.tv.material3.Glow(c.shadow, 22.dp)),
     ) {
-        Box(Modifier.fillMaxSize().background(Brush.linearGradient(listOf(tint.copy(alpha = 0.22f), c.glassFill)), shape).padding(22.dp)) {
+        Box(Modifier.fillMaxSize().background(bg, shape).clip(shape)) {
             val a = art
-            if (a != null) Image(a.image, null, Modifier.align(Alignment.TopEnd).size(78.dp).clip(RoundedCornerShape(18.dp)), contentScale = if (a.isBanner) ContentScale.Crop else ContentScale.Fit)
-            Column(Modifier.align(Alignment.BottomStart)) {
-                Text2("JUMP BACK IN", GlassType.kicker, c.rose)
+            if (a != null) Image(
+                a.image, null,
+                if (a.isBanner) Modifier.fillMaxSize() else Modifier.align(Alignment.Center).fillMaxHeight(0.95f).aspectRatio(1f),
+                contentScale = if (a.isBanner) ContentScale.Crop else ContentScale.Fit,
+            )
+            // Soft scrim so the caption reads on any brand colour.
+            Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().fillMaxHeight(0.42f).background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.55f)))))
+            Column(Modifier.align(Alignment.BottomStart).padding(22.dp)) {
+                Text2("JUMP BACK IN", GlassType.kicker, Color.White.copy(alpha = 0.85f))
                 Spacer(Modifier.height(6.dp))
-                Text2(tvApp.label, GlassType.hero.copy(fontFamily = dev.glasstv.launcher.ui.theme.Fraunces, fontSize = GlassType.hero.fontSize * 0.62f), c.text)
+                Text2(tvApp.label, GlassType.hero.copy(fontFamily = dev.glasstv.launcher.ui.theme.Fraunces, fontSize = GlassType.hero.fontSize * 0.62f), Color.White)
             }
         }
     }
@@ -488,7 +494,7 @@ private fun BrandTile(app: GlassApp, tvApp: TvApp, onFocused: () -> Unit, onLong
     var art by remember(tvApp.packageName) { mutableStateOf<AppArt?>(null) }
     LaunchedEffect(tvApp.packageName) { art = app.appRepo.art(tvApp) }
     // Brand colour from the logo; black-and-white logos (e.g. Max) get a clean white tile.
-    val tint = art?.tint?.takeIf { it != 0 }?.let { Color(it) } ?: Color.White
+    val tint = art?.edge?.takeIf { it != 0 }?.let { Color(it) } ?: art?.tint?.takeIf { it != 0 }?.let { Color(it) } ?: Color.White
     val shape = RoundedCornerShape(14.dp)
     androidx.tv.material3.Surface(
         onClick = { app.appRepo.launch(tvApp) }, onLongClick = onLongClick,
@@ -506,7 +512,8 @@ private fun BrandTile(app: GlassApp, tvApp: TvApp, onFocused: () -> Unit, onLong
             when {
                 a == null -> Text2(tvApp.label, GlassType.label, Color.White)
                 a.isBanner -> Image(a.image, tvApp.label, Modifier.fillMaxSize().clip(shape), contentScale = ContentScale.Crop)
-                else -> Image(a.image, tvApp.label, Modifier.fillMaxSize(0.62f).clip(RoundedCornerShape(10.dp)), contentScale = ContentScale.Fit)
+                // Logo at full card height on its own background colour: reads as one edge-to-edge card.
+                else -> Image(a.image, tvApp.label, Modifier.fillMaxHeight().aspectRatio(1f), contentScale = ContentScale.Fit)
             }
         }
     }
