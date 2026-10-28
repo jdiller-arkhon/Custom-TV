@@ -45,6 +45,7 @@ android {
             }
             // Optional local folder of <package>.png icons for realistic previews (never committed).
             project.findProperty("previewIcons")?.let { dir -> it.systemProperty("tvscreens.icons", dir.toString()) }
+            project.findProperty("motionFrames")?.let { dir -> it.systemProperty("tvscreens.frames", dir.toString()) }
             if (!project.hasProperty("tvScreens")) it.exclude("**/TvScreensTest*")
         }
     }

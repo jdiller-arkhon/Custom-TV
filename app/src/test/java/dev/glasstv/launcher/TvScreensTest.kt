@@ -75,6 +75,29 @@ class TvScreensTest {
         compose.onRoot().captureRoboImage("$out/$name.png")
     }
 
+    /** Frame-by-frame capture of the screen transitions (only with -PmotionFrames=<dir>). */
+    @Test fun transitionFrames() {
+        val dir = System.getProperty("tvscreens.frames") ?: return
+        androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().setInTouchMode(false)
+        compose.runOnUiThread { compose.activity.ui.qrOpen = false }
+        compose.mainClock.advanceTimeBy(3000); compose.waitForIdle()
+        compose.mainClock.autoAdvance = false
+        var n = 0
+        fun film(frames: Int, step: Int = 2) = repeat(frames) {
+            repeat(step) { compose.mainClock.advanceTimeByFrame() }
+            org.robolectric.shadows.ShadowLooper.idleMainLooper()
+            compose.onRoot().captureRoboImage("$dir/f%03d.png".format(n++))
+        }
+        film(6)
+        compose.runOnUiThread { compose.activity.ui.appsOpen = true }; film(16)
+        film(4, 4)
+        compose.runOnUiThread { compose.activity.ui.openApp = dev.glasstv.launcher.BuiltInApp.GAME_NIGHT }; film(16)
+        film(4, 4)
+        compose.runOnUiThread { compose.activity.ui.openApp = null; compose.activity.ui.appsOpen = false }; film(16)
+        film(4, 4)
+        compose.mainClock.autoAdvance = true
+    }
+
     @Test fun screens() {
         androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().setInTouchMode(false) // TVs have no touch mode
         compose.runOnUiThread { compose.activity.ui.qrOpen = false }

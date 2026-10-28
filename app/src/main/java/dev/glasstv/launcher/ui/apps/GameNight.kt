@@ -61,13 +61,16 @@ fun GameNightApp(onClose: () -> Unit) {
     var vsGrace by remember { mutableStateOf(true) }
     val g = game
     AppSheet(g?.emoji ?: "🎲", g?.title ?: "Game Night", if (g == null) "Pick a game · play each other or Grace" else "Back to games: press Back", onClose = { if (g != null) game = null else onClose() }) {
-        when (g) {
+        androidx.compose.animation.AnimatedContent(
+            g, Modifier.fillMaxWidth().weight(1f),
+            transitionSpec = { dev.glasstv.launcher.ui.components.Motion.forward(false, deeper = targetState != null) }, label = "game",
+        ) { gm -> Column(Modifier.fillMaxSize()) { when (gm) {
             null -> GamePicker(vsGrace, { vsGrace = it }) { game = it }
             Game.TIC_TAC_TOE -> TicTacToeBoard(vsGrace)
             Game.CONNECT_FOUR -> ConnectFourBoard(vsGrace)
             Game.CHECKERS -> CheckersBoard(vsGrace)
             Game.MEMORY -> MemoryBoard(vsGrace)
-        }
+        } } }
     }
 }
 

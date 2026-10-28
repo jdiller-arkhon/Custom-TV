@@ -2,6 +2,7 @@ package dev.glasstv.launcher.ui.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.ui.draw.blur
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -140,8 +141,17 @@ fun LauncherRoot(app: GlassApp, ui: LauncherUi) {
             OrbBackground(settings.reduceMotion, settings.extraBlur, accent = accent)
 
             val anyOverlay = ui.aiOpen || ui.settingsOpen || ui.qrOpen || ui.dateNight || ui.calendarOpen || ui.appsOpen || ui.openApp != null
+            // Home gently recedes (shrinks, dims, softens) while a sheet is up, then springs back.
+            val depth by androidx.compose.animation.core.animateFloatAsState(
+                if (anyOverlay && !settings.reduceMotion) 1f else 0f,
+                androidx.compose.animation.core.spring(dampingRatio = 0.9f, stiffness = androidx.compose.animation.core.Spring.StiffnessLow), label = "depth",
+            )
             HomeScreen(
-                app, ui, settings, now, Modifier.fillMaxSize(), interactive = !anyOverlay && !ui.ambient,
+                app, ui, settings, now,
+                Modifier.fillMaxSize()
+                    .graphicsLayer { val k = 1f - 0.05f * depth; scaleX = k; scaleY = k; alpha = 1f - 0.35f * depth }
+                    .then(if (depth > 0.01f) Modifier.blur((10 * depth).dp) else Modifier),
+                interactive = !anyOverlay && !ui.ambient,
                 onAccent = { a -> scope.launch { accent = app.appRepo.art(a)?.tint?.takeIf { it != 0 }?.let { Color(it) } } },
             )
 
@@ -151,25 +161,25 @@ fun LauncherRoot(app: GlassApp, ui: LauncherUi) {
             }
             AnimatedVisibility(
                 ui.aiOpen && !ui.ambient,
-                enter = slideInHorizontally { it } + fadeIn(),
-                exit = slideOutHorizontally { it } + fadeOut(),
+                enter = slideInHorizontally(androidx.compose.animation.core.spring(dampingRatio = 0.85f, stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow)) { it } + fadeIn(),
+                exit = slideOutHorizontally(androidx.compose.animation.core.tween(240, easing = dev.glasstv.launcher.ui.components.Motion.Emphasized)) { it } + fadeOut(),
                 modifier = Modifier.align(Alignment.CenterEnd),
             ) {
                 AiPanel(app, onClose = { ui.aiOpen = false })
             }
 
-            if (ui.settingsOpen) {
+            dev.glasstv.launcher.ui.components.SheetHost(ui.settingsOpen, settings.reduceMotion) {
                 SettingsScreen(app, settings, onClose = { ui.settingsOpen = false }, onShowQr = { ui.qrOpen = true })
             }
 
-            if (ui.qrOpen) {
+            dev.glasstv.launcher.ui.components.SheetHost(ui.qrOpen, settings.reduceMotion) {
                 RemoteQrSheet(onClose = {
                     ui.qrOpen = false
                     if (!settings.onboarded) app.scope.launch { app.settingsRepo.setOnboarded() }
                 })
             }
 
-            if (ui.dateNight && !ui.ambient) {
+            dev.glasstv.launcher.ui.components.SheetHost(ui.dateNight && !ui.ambient, settings.reduceMotion) {
                 DateNightSheet(
                     app, settings.reduceMotion,
                     onAskGrace = { prompt -> ui.dateNight = false; ui.aiOpen = true; app.assistant.send(prompt) },
@@ -178,7 +188,7 @@ fun LauncherRoot(app: GlassApp, ui: LauncherUi) {
             }
 
             // Built-in apps
-            if (ui.appsOpen && ui.openApp == null && !ui.ambient) {
+            dev.glasstv.launcher.ui.components.SheetHost(ui.appsOpen && ui.openApp == null && !ui.ambient, settings.reduceMotion) {
                 dev.glasstv.launcher.ui.apps.AppsHub(onOpen = { a ->
                     when (a) {
                         dev.glasstv.launcher.BuiltInApp.CALENDAR -> { ui.appsOpen = false; ui.calendarOpen = true }
@@ -187,7 +197,7 @@ fun LauncherRoot(app: GlassApp, ui: LauncherUi) {
                     }
                 }, onClose = { ui.appsOpen = false })
             }
-            ui.openApp?.takeIf { !ui.ambient }?.let { a ->
+            dev.glasstv.launcher.ui.components.SheetHost(ui.openApp?.takeIf { !ui.ambient }, settings.reduceMotion) { a ->
                 val close = { ui.openApp = null }
                 when (a) {
                     dev.glasstv.launcher.BuiltInApp.LISTS -> dev.glasstv.launcher.ui.apps.ListsApp(app, close)
@@ -205,14 +215,14 @@ fun LauncherRoot(app: GlassApp, ui: LauncherUi) {
                 }
             }
 
-            if (ui.calendarOpen && !ui.ambient) {
+            dev.glasstv.launcher.ui.components.SheetHost(ui.calendarOpen && !ui.ambient, settings.reduceMotion) {
                 CalendarSheet(app, onAskGrace = { ui.calendarOpen = false; ui.aiOpen = true; app.assistant.setDraft("Add ") }, onClose = { ui.calendarOpen = false })
             }
 
             // Pink toast (event added / reminders), auto-hides.
             val toast = ui.toast
             LaunchedEffect(toast) { if (toast != null) { delay(5000); ui.toast = null } }
-            AnimatedVisibility(toast != null, Modifier.align(Alignment.TopCenter).padding(top = 28.dp), enter = fadeIn(), exit = fadeOut()) {
+            AnimatedVisibility(toast != null, Modifier.align(Alignment.TopCenter).padding(top = 28.dp), enter = fadeIn() + androidx.compose.animation.slideInVertically { -it }, exit = fadeOut() + androidx.compose.animation.slideOutVertically { -it }) {
                 val c = LocalGlass.current
                 Row(
                     Modifier.shadow(16.dp, RoundedCornerShape(50), ambientColor = c.shadow, spotColor = c.shadow)
@@ -229,7 +239,11 @@ fun LauncherRoot(app: GlassApp, ui: LauncherUi) {
             PairingCodeToast(Modifier.align(Alignment.TopCenter).padding(top = 32.dp))
 
 
-            AnimatedVisibility(ui.ambient, enter = fadeIn(), exit = fadeOut()) {
+            AnimatedVisibility(
+                ui.ambient,
+                enter = fadeIn(androidx.compose.animation.core.tween(700)) + androidx.compose.animation.scaleIn(androidx.compose.animation.core.tween(900, easing = dev.glasstv.launcher.ui.components.Motion.Emphasized), initialScale = 1.04f),
+                exit = fadeOut(androidx.compose.animation.core.tween(400)),
+            ) {
                 AmbientScreen(now, settings)
             }
         }
