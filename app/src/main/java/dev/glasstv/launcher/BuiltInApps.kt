@@ -12,6 +12,7 @@ enum class BuiltInApp(val title: String, val emoji: String, val blurb: String, v
     MEMORY("Memory", "🧠", "Grace remembers"),
     SLEEP("Sleep Timer", "🌙", "Pause & dim"),
     FIREPLACE("Fireplace", "🔥", "Cozy crackle"),
+    GAME_NIGHT("Game Night", "♟️", "Board games for two"),
     WOULD_YOU_RATHER("Would You Rather", "🎲", "A game for two"),
     GUEST_WIFI("Guest Wi-Fi", "📶", "Scan to join"),
     MEMORIES("Memories", "📸", "Photo slideshow", ready = false),
@@ -34,7 +35,8 @@ object BuiltInApps {
         s.startsWith("memor") -> BuiltInApp.MEMORY
         s.startsWith("love") -> BuiltInApp.LOVE_NOTES
         s.contains("wi") -> BuiltInApp.GUEST_WIFI
-        s.startsWith("would") || s.startsWith("game") -> BuiltInApp.WOULD_YOU_RATHER
+        s.startsWith("game") || s.startsWith("board") || s.contains("checkers") || s.contains("connect four") || s.contains("tic") -> BuiltInApp.GAME_NIGHT
+        s.startsWith("would") -> BuiltInApp.WOULD_YOU_RATHER
         else -> null
     }
 }

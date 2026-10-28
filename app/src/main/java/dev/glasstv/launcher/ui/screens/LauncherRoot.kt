@@ -199,6 +199,7 @@ fun LauncherRoot(app: GlassApp, ui: LauncherUi) {
                     dev.glasstv.launcher.BuiltInApp.SLEEP -> dev.glasstv.launcher.ui.apps.SleepApp(app, close)
                     dev.glasstv.launcher.BuiltInApp.GUEST_WIFI -> dev.glasstv.launcher.ui.apps.GuestWifiApp(app, close)
                     dev.glasstv.launcher.BuiltInApp.FIREPLACE -> dev.glasstv.launcher.ui.apps.FireplaceApp(settings.reduceMotion, close)
+                    dev.glasstv.launcher.BuiltInApp.GAME_NIGHT -> dev.glasstv.launcher.ui.apps.GameNightApp(close)
                     dev.glasstv.launcher.BuiltInApp.WOULD_YOU_RATHER -> dev.glasstv.launcher.ui.apps.WouldYouRatherApp(close)
                     else -> close()
                 }
@@ -237,7 +238,7 @@ fun LauncherRoot(app: GlassApp, ui: LauncherUi) {
 
 /**
  * Google-TV-style "For you" home in soft pink: one rounded panel with a header (greeting, tabs,
- * Ask Grace, icon buttons), a feature row (Tonight's pick · Jump back in · Up next) and a row of
+ * Ask Grace, icon buttons), two roomy feature cards (Tonight's pick · Jump back in) and a row of
  * brand-coloured app tiles with the real logos.
  */
 @Composable
@@ -258,10 +259,6 @@ private fun HomeScreen(
     val others = remember(pinnedPkgs, apps) { apps.filter { it.packageName !in pinnedPkgs } }
     val row = pinned + others
     val recent = remember(settings.recents, byPkg) { settings.recents.mapNotNull { byPkg[it] } }
-    val events by app.calendar.events.collectAsState()
-    val next = remember(events, now) { app.calendar.upcoming(now).firstOrNull() }
-    val home by app.home.state.collectAsState()
-    val countdown = home.countdowns.firstOrNull { !it.date.isBefore(now.toLocalDate()) }
     // Tonight's pick: stable for the day, so the card doesn't change every time you come home.
     val pick = remember(now.toLocalDate()) { dev.glasstv.launcher.data.DateNight.pick(emptyList(), kotlin.random.Random(now.toLocalDate().toEpochDay())) }
     val scope = rememberCoroutineScope()
@@ -291,7 +288,7 @@ private fun HomeScreen(
         modifier
             .then(if (interactive) Modifier else Modifier.focusProperties { onEnter = { cancelFocusChange() } })
             .focusGroup()
-            .padding(horizontal = 40.dp, vertical = 30.dp),
+            .padding(horizontal = 56.dp, vertical = 40.dp),
     ) {
         // The panel ("the screen" in the reference): soft pink, rounded, with a warm glow.
         Column(
@@ -299,7 +296,7 @@ private fun HomeScreen(
                 .shadow(40.dp, RoundedCornerShape(30.dp), ambientColor = c.rose.copy(alpha = 0.45f), spotColor = c.rose.copy(alpha = 0.45f))
                 .background(Brush.verticalGradient(listOf(c.panelTop, c.panelBottom)), RoundedCornerShape(30.dp))
                 .border(1.dp, c.highlightTop, RoundedCornerShape(30.dp))
-                .padding(horizontal = 34.dp, vertical = 24.dp)
+                .padding(horizontal = 52.dp, vertical = 40.dp)
         ) {
             // Header
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.rise(0f)) {
@@ -348,10 +345,10 @@ private fun HomeScreen(
                 }
                 }
             }
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(34.dp))
 
-            // Feature row
-            Row(Modifier.fillMaxWidth().weight(1f).rise(0.12f), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            // Feature row: just two cards, so the screen can breathe.
+            Row(Modifier.fillMaxWidth().weight(1f).rise(0.12f), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
                 FeatureCard(
                     Modifier.weight(2f), firstFocus,
                     brush = Brush.linearGradient(listOf(c.rose, Color(0xFFF59BBF), Color(0xFFFFC6DC))),
@@ -360,28 +357,13 @@ private fun HomeScreen(
                 ) { ui.dateNight = true }
                 val jb = recent.firstOrNull() ?: row.firstOrNull()
                 if (jb != null) AppFeatureCard(app, jb, Modifier.weight(1f)) { onAccent(jb) }
-                when {
-                    next != null -> FeatureCard(
-                        Modifier.weight(1f), null, brush = Brush.linearGradient(listOf(c.glassFill, c.pink)),
-                        kicker = "UP NEXT", title = "${next.emoji} ${next.title}", sub = next.whenText(now),
-                    ) { ui.calendarOpen = true }
-                    countdown != null -> FeatureCard(
-                        Modifier.weight(1f), null, brush = Brush.linearGradient(listOf(c.glassFill, c.pink)),
-                        kicker = "COUNTING DOWN", title = "${java.time.temporal.ChronoUnit.DAYS.between(now.toLocalDate(), countdown.date)} days",
-                        sub = "until ${countdown.title} ${countdown.emoji}",
-                    ) { ui.openApp = dev.glasstv.launcher.BuiltInApp.COUNTDOWNS }
-                    else -> FeatureCard(
-                        Modifier.weight(1f), null, brush = Brush.linearGradient(listOf(c.glassFill, c.pink)),
-                        kicker = "PLANS", title = "📅 Nothing planned", sub = "Ask Grace to add something",
-                    ) { ui.calendarOpen = true }
-                }
             }
-            Spacer(Modifier.height(18.dp))
+            Spacer(Modifier.height(30.dp))
 
             // App row: brand-coloured tiles with the real logos.
             Row(
                 Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(vertical = 8.dp, horizontal = 4.dp).rise(0.24f),
-                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                horizontalArrangement = Arrangement.spacedBy(22.dp),
             ) {
                 row.forEach { a -> key(a.packageName) { BrandTile(app, a, { onAccent(a) }, { togglePin(a.packageName) }) } }
             }

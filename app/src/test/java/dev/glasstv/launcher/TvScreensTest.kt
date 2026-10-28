@@ -106,6 +106,7 @@ class TvScreensTest {
             dev.glasstv.launcher.BuiltInApp.LISTS to "lists", dev.glasstv.launcher.BuiltInApp.COUNTDOWNS to "countdowns",
             dev.glasstv.launcher.BuiltInApp.WATCHLIST to "watchlist", dev.glasstv.launcher.BuiltInApp.LOVE_NOTES to "love-notes",
             dev.glasstv.launcher.BuiltInApp.GUEST_WIFI to "guest-wifi", dev.glasstv.launcher.BuiltInApp.WOULD_YOU_RATHER to "would-you-rather",
+            dev.glasstv.launcher.BuiltInApp.GAME_NIGHT to "game-night",
             dev.glasstv.launcher.BuiltInApp.FIREPLACE to "fireplace", dev.glasstv.launcher.BuiltInApp.TIMERS to "timers",
         )) {
             compose.runOnUiThread { compose.activity.ui.openApp = a }
